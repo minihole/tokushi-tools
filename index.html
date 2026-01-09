@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>えいき教材ポータル</title>
+  <style>
+    body{margin:0;font-family:system-ui,-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif;background:#0b0f14;color:#e8f0ff}
+    header{padding:18px 16px}
+    h1{margin:0;font-size:22px}
+    .sub{margin:8px 0 0;color:#a8b4c7;font-size:13px;line-height:1.5}
+    .grid{padding:0 16px 20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+    .card{background:#121a24;border:1px solid rgba(255,255,255,.10);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px;min-height:140px}
+    .card h2{margin:0;font-size:18px}
+    .meta{color:#a8b4c7;font-size:13px;line-height:1.5}
+    .btn{font-size:16px;font-weight:800;padding:12px 14px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:rgba(77,163,255,.18);color:#e8f0ff}
+    .btn:active{transform:scale(.98)}
+  </style>
+</head>
+<body>
+<header>
+  <h1>えいき教材ポータル</h1>
+  <p class="sub">授業中に迷わない入口ページ。カードを押すと教材が開きます。</p>
+</header>
+
+<div class="grid">
+  <div class="card">
+    <h2>教材①（例）</h2>
+    <div class="meta">ここに説明を書けます。</div>
+    <button class="btn" onclick="location.href='./tools/tool1.html'">ひらく</button>
+  </div>
+
+  <div class="card">
+    <h2>教材②（例）</h2>
+    <div class="meta">ここに説明を書けます。</div>
+    <button class="btn" onclick="location.href='./tools/tool2.html'">ひらく</button>
+  </div>
+</div>
+
+</body>
+</html>
