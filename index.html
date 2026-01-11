@@ -2,191 +2,187 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>えいき教材ポータル</title>
   <style>
     :root{
-      --paper:#f6f2ea;
-      --paper2:#fbf9f4;
-      --ink:#141414;
-      --sub:#5a5a5a;
-      --line:#1a1a1a;
-      --lineSoft:rgba(20,20,20,.14);
+      /* Layout */
+      --sbW: 320px;
+      --sbCollapsedW: 72px;
+      --radius: 18px;
+      --radiusSm: 14px;
+      --shadow: 0 10px 30px rgba(0,0,0,.12);
 
-      --woodA:#c09362;
-      --woodB:#a87442;
+      /* Colors */
+      --bg: #f6f3ee;
+      --paper: rgba(255,255,255,.78);
+      --ink: #111;
+      --inkSoft: rgba(17,17,17,.70);
+      --line: rgba(17,17,17,.18);
+      --line2: rgba(17,17,17,.26);
+      --chip: rgba(17,17,17,.08);
+      --chipOn: #111;
+      --chipOnText: #fff;
 
-      --radius:16px;
-      --shadow:0 12px 28px rgba(0,0,0,.10);
-      --shadow2:0 7px 18px rgba(0,0,0,.08);
+      /* Wood */
+      --wood1: #caa26f;
+      --wood2: #b98952;
+      --wood3: rgba(17,17,17,.14);
 
-      /* Safari風：左の細いアイコン列 */
-      --sbW:300px;
-      --sbCollapsedW:64px;
+      /* Accent */
+      --accent: #111;
+      --ok: #1d7a3a;
     }
 
-    *{ box-sizing:border-box; }
+    *{ box-sizing: border-box; }
     html,body{ height:100%; }
     body{
       margin:0;
-      color:var(--ink);
-      font-family: ui-sans-serif, system-ui, -apple-system, "Hiragino Kaku Gothic ProN",
-        "Noto Sans JP","Yu Gothic","Meiryo",sans-serif;
-      background: linear-gradient(180deg, var(--paper2), var(--paper));
-      overflow-x:hidden;
-    }
-
-    /* ほんのり紙質（控えめ） */
-    body::before{
-      content:"";
-      position:fixed; inset:0;
-      pointer-events:none;
+      font-family: system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: var(--ink);
       background:
-        radial-gradient(circle at 15% 10%, rgba(0,0,0,.03), transparent 34%),
-        radial-gradient(circle at 80% 20%, rgba(0,0,0,.02), transparent 30%),
-        repeating-radial-gradient(circle at 25% 30%,
-          rgba(0,0,0,.016) 0 1px,
-          transparent 1px 7px);
-      opacity:.40;
-      mix-blend-mode:multiply;
+        radial-gradient(1200px 900px at 20% 35%, rgba(0,0,0,.035), transparent 60%),
+        radial-gradient(1000px 800px at 80% 50%, rgba(0,0,0,.03), transparent 60%),
+        repeating-linear-gradient(45deg, rgba(0,0,0,.012), rgba(0,0,0,.012) 6px, transparent 6px, transparent 12px),
+        var(--bg);
+      overflow:hidden;
     }
 
-    /* ===== App layout ===== */
+    /* App shell */
     .app{
-      min-height:100vh;
+      height: 100%;
       display:flex;
       align-items:stretch;
-      position:relative;
     }
 
-    /* ===== Sidebar ===== */
+    /* Sidebar */
     .sidebar{
       width: var(--sbW);
-      height:100vh;
-      position:sticky;
-      top:0;
-      z-index:20;
-      border-right:2px solid var(--line);
-      background: rgba(255,255,255,.74);
-      backdrop-filter: blur(10px);
-      box-shadow: 10px 0 30px rgba(0,0,0,.05);
-      overflow:hidden;
+      background: rgba(255,255,255,.78);
+      border-right: 3px solid var(--ink);
+      box-shadow: 0 0 0 1px rgba(0,0,0,.03) inset;
+      padding: 14px 12px;
       display:flex;
       flex-direction:column;
+      gap: 12px;
+      overflow:hidden;
     }
 
-    .sbHead{
+    .sbTop{
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:10px;
-      padding:12px 10px;
-      border-bottom:2px solid rgba(0,0,0,.10);
     }
 
-    .sbBrand{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      min-width:0;
+    .brand{
+      display:flex; align-items:center; gap:10px;
+      min-width: 0;
     }
-
-    .sbLogo{
-      width:40px; height:40px;
-      border:2px solid var(--line);
-      border-radius: 12px;
+    .brandMark{
+      width:42px; height:42px; border-radius: 14px;
       background:
-        repeating-linear-gradient(90deg, rgba(255,255,255,.06) 0 10px, rgba(0,0,0,.03) 10px 16px),
-        linear-gradient(135deg, var(--woodA), var(--woodB));
-      box-shadow: var(--shadow2);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      flex:0 0 auto;
+        radial-gradient(12px 12px at 25% 25%, rgba(255,255,255,.55), transparent 60%),
+        linear-gradient(180deg, rgba(0,0,0,.06), transparent 40%),
+        repeating-linear-gradient(90deg, rgba(0,0,0,.08), rgba(0,0,0,.08) 3px, transparent 3px, transparent 10px),
+        linear-gradient(180deg, var(--wood1), var(--wood2));
+      border: 3px solid var(--ink);
+      display:grid; place-items:center;
     }
-
-    .sbTitle{
-      display:flex;
-      flex-direction:column;
-      gap:2px;
+    .brandMark svg{ width:22px; height:22px; }
+    .brandText{
+      display:flex; flex-direction:column; line-height:1.1;
       min-width:0;
     }
-    .sbTitle b{
-      font-size:14px;
-      font-weight:950;
+    .brandText b{
+      font-size:16px;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
     }
-    .sbTitle span{
+    .brandText span{
       font-size:12px;
-      color:rgba(0,0,0,.58);
+      color: var(--inkSoft);
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
     }
 
-    .sbBtn{
-      border:2px solid var(--line);
-      background: rgba(255,255,255,.90);
+    .sbToggles{
+      display:flex; align-items:center; gap:8px;
+      flex-shrink:0;
+    }
+    .btn{
+      border: 3px solid var(--ink);
+      background: rgba(255,255,255,.82);
       border-radius: 999px;
-      padding:8px 10px;
-      font-weight:950;
+      padding: 10px 12px;
+      font-weight: 800;
       cursor:pointer;
-      box-shadow: var(--shadow2);
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
       user-select:none;
+      box-shadow: 0 2px 0 rgba(0,0,0,.10);
+      transition: transform .06s ease, background .2s ease;
     }
-    .sbBtn:hover{ transform: translateY(-1px); }
-    .sbBtn:active{ transform: translateY(0px); }
+    .btn:active{ transform: translateY(1px); }
+    .btn.small{ padding: 8px 10px; font-weight: 800; font-size: 12px; }
+    .btn.black{
+      background: var(--ink);
+      color:#fff;
+    }
+    .btn.ghost{
+      background: rgba(255,255,255,.0);
+    }
 
-    .sbBody{
-      padding:12px 10px 14px;
+    .sbScroll{
       overflow:auto;
+      padding-right: 6px;
+      margin-right: -6px;
     }
+    .sbScroll::-webkit-scrollbar{ width: 10px; }
+    .sbScroll::-webkit-scrollbar-thumb{ background: rgba(0,0,0,.18); border-radius:999px; border:2px solid rgba(255,255,255,.7); }
 
     .sbSection{
-      margin-top:10px;
-      padding-top:10px;
-      border-top:2px solid rgba(0,0,0,.10);
+      border-top: 2px solid rgba(17,17,17,.12);
+      padding-top: 12px;
+      margin-top: 6px;
     }
-
     .sbSectionTitle{
-      font-size:12px;
-      font-weight:950;
-      color:rgba(0,0,0,.65);
-      letter-spacing:.04em;
-      padding:0 6px 8px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
+      display:flex; align-items:center; justify-content:space-between;
       gap:10px;
+      margin-bottom: 10px;
+      color: var(--inkSoft);
+      font-weight: 900;
+      font-size: 12px;
+      letter-spacing: .02em;
     }
 
-    .sbList{ display:flex; flex-direction:column; gap:8px; }
+    .sbList{
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+    }
 
     .sbItem{
+      width:100%;
+      border: 2px solid rgba(17,17,17,.20);
+      border-radius: var(--radiusSm);
+      background: rgba(255,255,255,.70);
+      padding: 10px 10px;
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:10px;
-      padding:10px 10px;
-      border-radius: 14px;
-      border:2px solid rgba(0,0,0,.18);
-      background: rgba(255,255,255,.92);
-      box-shadow: 0 8px 18px rgba(0,0,0,.06);
       cursor:pointer;
       user-select:none;
-      transition: transform .12s ease, background .12s ease, border-color .12s ease;
+      transition: transform .06s ease, background .2s ease, border-color .2s ease;
     }
-    .sbItem:hover{ transform: translateY(-1px); }
+    .sbItem:hover{ background: rgba(255,255,255,.88); }
+    .sbItem:active{ transform: translateY(1px); }
 
-    .sbItem.active{
-      background: rgba(0,0,0,.90);
+    .sbItem.on{
+      border-color: rgba(17,17,17,.65);
+      background: rgba(17,17,17,.92);
       color:#fff;
-      border-color: var(--line);
     }
 
     .sbLeft{
@@ -197,20 +193,22 @@
     }
 
     .sbIcon{
-      width:36px; height:36px;
-      border-radius: 12px;
-      border:2px solid var(--line);
-      background: rgba(255,255,255,.90);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      flex:0 0 auto;
-      box-shadow: var(--shadow2);
+      width:46px;
+      height:46px;
+      border-radius: 16px;
+      border: 3px solid var(--ink);
+      background: rgba(255,255,255,.85);
+      display:grid;
+      place-items:center;
+      flex-shrink:0;
+      box-shadow: 0 2px 0 rgba(0,0,0,.10);
     }
-    .sbItem.active .sbIcon{
+    .sbItem.on .sbIcon{
+      border-color:#fff;
       background: rgba(255,255,255,.12);
-      border-color: rgba(255,255,255,.65);
+      box-shadow:none;
     }
+    .sbIcon svg{ width:22px; height:22px; }
 
     .sbText{
       display:flex;
@@ -219,83 +217,1486 @@
       min-width:0;
     }
     .sbText b{
-      font-size:14px;
-      font-weight:950;
+      font-size: 14px;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
     }
     .sbText span{
-      font-size:12px;
-      color:rgba(0,0,0,.58);
+      font-size: 12px;
+      color: var(--inkSoft);
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
     }
-    .sbItem.active .sbText span{ color:rgba(255,255,255,.72); }
+    .sbItem.on .sbText span{ color: rgba(255,255,255,.75); }
 
     .sbCount{
-      flex:0 0 auto;
-      font-size:12px;
-      font-weight:950;
-      padding:6px 10px;
+      width:34px; height:34px;
       border-radius: 999px;
-      border:2px solid rgba(0,0,0,.22);
-      background: rgba(255,255,255,.82);
-      color: rgba(0,0,0,.80);
+      display:grid; place-items:center;
+      border: 2px solid rgba(17,17,17,.30);
+      font-weight: 900;
+      background: rgba(255,255,255,.70);
+      flex-shrink:0;
     }
-    .sbItem.active .sbCount{
-      border-color: rgba(255,255,255,.55);
+    .sbItem.on .sbCount{
+      border-color: rgba(255,255,255,.70);
       background: rgba(255,255,255,.12);
       color:#fff;
     }
 
-    /* ===== Collapsed (Safariの左アイコン列風) ===== */
-    /* ===== Collapsed (Safariの左アイコン列風) ===== */
-.app.sb-collapsed .sidebar{
-  width: var(--sbCollapsedW);
-}
+    .hintBox{
+      margin-top: 10px;
+      border: 2px dashed rgba(17,17,17,.20);
+      border-radius: var(--radiusSm);
+      padding: 10px;
+      background: rgba(255,255,255,.55);
+      color: var(--inkSoft);
+      font-weight: 800;
+      font-size: 12px;
+      line-height: 1.4;
+    }
 
-/* 収納時は「ページ」セクションだけ表示（教科/単元は隠す） */
-.app.sb-collapsed .sbSection{ display:none; }
-.app.sb-collapsed .sbSection:first-child{
-  display:block;
-  border-top:none;
-  margin-top:0;
-  padding-top:0;
-}
+    /* Collapsed (Safari風の左アイコン列) */
+    .app.sb-collapsed .sidebar{ width: var(--sbCollapsedW); padding: 12px 10px; }
+    .app.sb-collapsed .brandText{ display:none; }
+    .app.sb-collapsed .btn.small span{ display:none; }
+    .app.sb-collapsed .sbScroll{ padding-right:0; margin-right:0; }
+    .app.sb-collapsed .sbSection{ display:none; }
+    .app.sb-collapsed .sbSection[data-keep="pages"]{ display:block; border-top:none; padding-top:0; margin-top:0; }
+    .app.sb-collapsed .sbSectionTitle{ display:none; }
+    .app.sb-collapsed .sbList{ gap: 12px; align-items:center; }
+    .app.sb-collapsed .sbItem{
+      width: 52px;
+      padding: 0;
+      border: none;
+      background: transparent;
+      box-shadow:none;
+      justify-content:center;
+    }
+    .app.sb-collapsed .sbLeft{ gap:0; }
+    .app.sb-collapsed .sbText, .app.sb-collapsed .sbCount{ display:none; }
+    .app.sb-collapsed .sbIcon{ width:52px; height:52px; border-radius: 18px; }
+    .app.sb-collapsed .sbTop{ justify-content:center; }
+    .app.sb-collapsed .sbToggles{ position:absolute; left: 10px; top: 10px; }
+    .app.sb-collapsed .brand{ justify-content:center; }
 
-.app.sb-collapsed .sbTitle,
-.app.sb-collapsed .sbSectionTitle span,
-.app.sb-collapsed .sbText,
-.app.sb-collapsed .sbCount{
-  display:none;
-}
+    /* Main */
+    .main{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+    }
 
-.app.sb-collapsed .sbBody{
-  padding:10px 8px;
-}
+    /* Header wood panel */
+    .topPanel{
+      margin: 14px;
+      border: 4px solid var(--ink);
+      border-radius: 22px;
+      background:
+        radial-gradient(700px 220px at 12% 20%, rgba(255,255,255,.26), transparent 60%),
+        radial-gradient(700px 260px at 70% 30%, rgba(0,0,0,.07), transparent 60%),
+        repeating-linear-gradient(90deg, rgba(0,0,0,.10), rgba(0,0,0,.10) 3px, transparent 3px, transparent 12px),
+        linear-gradient(180deg, var(--wood1), var(--wood2));
+      box-shadow: var(--shadow);
+      padding: 18px 18px 14px;
+      position:relative;
+      overflow:hidden;
+    }
+    .topPanel::after{
+      content:"";
+      position:absolute;
+      right: 18px;
+      bottom: 8px;
+      width: 220px;
+      height: 90px;
+      opacity:.30;
+      background:
+        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="240" height="100" viewBox="0 0 240 100"><path d="M10 75 C35 50,55 55,70 40 C88 22,110 40,125 25 C145 6,165 35,185 22 C205 10,220 25,232 20" fill="none" stroke="%23111" stroke-width="4" stroke-linecap="round"/><path d="M75 39 l-10 18 h20 z" fill="none" stroke="%23111" stroke-width="4"/><path d="M125 24 l-10 18 h20 z" fill="none" stroke="%23111" stroke-width="4"/></svg>') no-repeat center / contain;
+      pointer-events:none;
+    }
 
-.app.sb-collapsed .sbList{
-  align-items:center;
-  gap:10px;
-}
+    .topRow{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 16px;
+    }
 
-.app.sb-collapsed .sbItem{
-  width:48px;
-  padding:0;
-  border:none;
-  background:transparent;
-  box-shadow:none;
-  justify-content:center;
-}
+    .titleBox{
+      display:flex;
+      flex-direction:column;
+      gap: 6px;
+      min-width: 0;
+    }
+    .titleBox h1{
+      margin:0;
+      font-size: 34px;
+      letter-spacing: .02em;
+      line-height:1.05;
+      text-shadow: 0 2px 0 rgba(255,255,255,.18);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .titleBox p{
+      margin:0;
+      font-weight: 800;
+      color: rgba(17,17,17,.75);
+      font-size: 14px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
 
-.app.sb-collapsed .sbLeft{ gap:0; }
+    .searchBox{
+      min-width: 320px;
+      max-width: 520px;
+      flex: 1;
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      border: 4px solid var(--ink);
+      background: rgba(255,255,255,.80);
+      border-radius: 999px;
+      padding: 10px 12px;
+      box-shadow: 0 3px 0 rgba(0,0,0,.10);
+    }
+    .searchBox svg{ width:22px; height:22px; opacity: .85; }
+    .searchBox input{
+      width: 100%;
+      border: none;
+      outline: none;
+      background: transparent;
+      font-size: 16px;
+      font-weight: 800;
+    }
 
-.app.sb-collapsed .sbIcon{
-  width:48px;
-  height:48px;
-  border-radius: 14px;
-}
+    .chipRow{
+      margin-top: 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      flex-wrap:wrap;
+    }
 
-.app.sb-collapsed .sbBtn span{ display:none; }
+    .chips{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    .chip{
+      border: 3px solid var(--ink);
+      background: rgba(255,255,255,.75);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-weight: 900;
+      cursor:pointer;
+      user-select:none;
+      transition: transform .06s ease, background .2s ease;
+      font-size: 13px;
+    }
+    .chip:active{ transform: translateY(1px); }
+    .chip.on{
+      background: var(--ink);
+      color:#fff;
+    }
+
+    .rightActions{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    /* Content area */
+    .content{
+      flex: 1;
+      overflow:auto;
+      padding: 0 14px 14px;
+    }
+    .content::-webkit-scrollbar{ width: 12px; }
+    .content::-webkit-scrollbar-thumb{ background: rgba(0,0,0,.18); border-radius:999px; border:3px solid rgba(255,255,255,.7); }
+
+    .sectionTop{
+      margin: 12px 0;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      flex-wrap:wrap;
+    }
+    .badge{
+      border: 2px solid rgba(17,17,17,.25);
+      background: rgba(255,255,255,.62);
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-weight: 900;
+      color: var(--inkSoft);
+      font-size: 13px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      align-items:stretch;
+    }
+
+    @media (max-width: 1100px){
+      :root{ --sbW: 300px; }
+      .grid{ grid-template-columns: 1fr; }
+      .searchBox{ min-width: 260px; }
+    }
+
+    .card{
+      border: 3px solid var(--ink);
+      border-radius: 22px;
+      background: rgba(255,255,255,.70);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      min-height: 230px;
+    }
+
+    .thumb{
+      height: 110px;
+      border-bottom: 3px solid var(--ink);
+      position:relative;
+      background:
+        linear-gradient(180deg, rgba(0,0,0,.06), transparent 45%),
+        repeating-linear-gradient(45deg, rgba(0,0,0,.03), rgba(0,0,0,.03) 10px, transparent 10px, transparent 20px),
+        rgba(255,255,255,.55);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .thumb img{
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display:block;
+    }
+    .thumbLabel{
+      position:absolute;
+      top: 10px;
+      left: 10px;
+      border: 3px solid var(--ink);
+      border-radius: 999px;
+      padding: 6px 10px;
+      background: rgba(255,255,255,.78);
+      font-weight: 900;
+      font-size: 12px;
+    }
+    .thumbRight{
+      position:absolute;
+      top: 10px;
+      right: 10px;
+      display:flex;
+      gap: 8px;
+      align-items:center;
+    }
+    .pill{
+      border: 2px solid rgba(17,17,17,.25);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-weight: 900;
+      font-size: 12px;
+      background: rgba(255,255,255,.68);
+      color: var(--inkSoft);
+    }
+
+    .cardBody{
+      padding: 12px 14px 14px;
+      display:flex;
+      flex-direction:column;
+      gap: 8px;
+      flex:1;
+    }
+    .cardTitle{
+      font-size: 18px;
+      font-weight: 1000;
+      letter-spacing: .01em;
+      margin:0;
+      line-height:1.15;
+    }
+    .cardDesc{
+      margin:0;
+      color: var(--inkSoft);
+      font-weight: 800;
+      font-size: 13px;
+      line-height:1.35;
+      min-height: 34px;
+    }
+    .tagRow{
+      display:flex;
+      gap: 8px;
+      flex-wrap:wrap;
+    }
+    .tag{
+      border: 2px solid rgba(17,17,17,.20);
+      background: rgba(17,17,17,.06);
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-weight: 900;
+      font-size: 12px;
+      color: var(--inkSoft);
+    }
+
+    .cardActions{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      margin-top:auto;
+      padding-top: 8px;
+    }
+    .idText{
+      font-weight: 900;
+      color: rgba(17,17,17,.45);
+      font-size: 12px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .actionBtns{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    /* Create page */
+    .formWrap{
+      border: 3px solid var(--ink);
+      border-radius: 22px;
+      background: rgba(255,255,255,.72);
+      box-shadow: var(--shadow);
+      padding: 14px;
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 14px;
+      align-items:stretch;
+    }
+    @media (max-width: 1100px){
+      .formWrap{ grid-template-columns: 1fr; }
+    }
+    .panel{
+      border: 2px solid rgba(17,17,17,.18);
+      border-radius: 18px;
+      padding: 12px;
+      background: rgba(255,255,255,.70);
+    }
+    .panel h3{
+      margin:0 0 10px;
+      font-size: 14px;
+      letter-spacing:.02em;
+      color: var(--inkSoft);
+    }
+    .row{
+      display:grid;
+      grid-template-columns: 140px 1fr;
+      gap: 10px;
+      align-items:center;
+      margin-bottom: 10px;
+    }
+    .row label{
+      font-weight: 1000;
+      color: var(--inkSoft);
+      font-size: 13px;
+    }
+    input[type="text"], select, textarea{
+      width:100%;
+      border: 3px solid var(--ink);
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-weight: 900;
+      font-size: 14px;
+      background: rgba(255,255,255,.82);
+      outline:none;
+    }
+    textarea{
+      min-height: 180px;
+      resize: vertical;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-weight: 800;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+    .radioRow{
+      display:flex;
+      gap: 10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .radio{
+      display:flex;
+      align-items:center;
+      gap: 8px;
+      border: 2px solid rgba(17,17,17,.18);
+      border-radius: 999px;
+      padding: 8px 10px;
+      background: rgba(255,255,255,.65);
+      cursor:pointer;
+      user-select:none;
+      font-weight: 1000;
+      color: var(--inkSoft);
+      font-size: 13px;
+    }
+    .radio.on{
+      border-color: rgba(17,17,17,.55);
+      background: rgba(17,17,17,.92);
+      color:#fff;
+    }
+    .radio input{ display:none; }
+
+    .previewFrame{
+      width:100%;
+      height: 420px;
+      border: 3px solid var(--ink);
+      border-radius: 18px;
+      background: #fff;
+    }
+    .mono{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    /* Toast */
+    .toast{
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 14px;
+      background: rgba(17,17,17,.95);
+      color: #fff;
+      border: 3px solid #fff;
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-weight: 1000;
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+      opacity: 0;
+      pointer-events:none;
+      transition: opacity .2s ease, transform .2s ease;
+      z-index: 9999;
+      max-width: min(860px, calc(100vw - 28px));
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .toast.on{
+      opacity: 1;
+      transform: translateX(-50%) translateY(-4px);
+    }
+
+    /* Error bar (debug) */
+    .errBar{
+      position: fixed;
+      left: 14px;
+      bottom: 14px;
+      right: 14px;
+      background: rgba(120,0,0,.92);
+      color:#fff;
+      border: 3px solid #fff;
+      border-radius: 18px;
+      padding: 10px 12px;
+      font-weight: 1000;
+      z-index: 9998;
+      display:none;
+    }
+    .errBar code{ font-weight: 900; }
+  </style>
+</head>
+
+<body>
+  <div id="errBar" class="errBar"></div>
+  <div id="toast" class="toast"></div>
+
+  <div id="app" class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar" aria-label="サイドバー">
+      <div class="sbTop">
+        <div class="brand" title="えいき教材ポータル">
+          <div class="brandMark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M7 20h10" stroke="#111" stroke-width="2.8" stroke-linecap="round"/>
+              <path d="M6 19V10c0-2 2-3 3-4 1-1 2-2 3-2s2 1 3 2c1 1 3 2 3 4v9" stroke="#111" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M9 12h6" stroke="#111" stroke-width="2.8" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="brandText">
+            <b>えいき教材ポータル</b>
+            <span>カテゴリですぐ移動</span>
+          </div>
+        </div>
+
+        <div class="sbToggles">
+          <button id="toggleSidebar" class="btn small ghost" type="button" title="サイドバーの収納">
+            <span>☰</span> <span style="margin-left:6px;">収納</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="sbScroll">
+        <!-- Pages -->
+        <section class="sbSection" data-keep="pages">
+          <div class="sbSectionTitle"><span>ページ</span><span></span></div>
+          <div class="sbList" id="pageList"></div>
+        </section>
+
+        <!-- Subject -->
+        <section class="sbSection" id="sbSubject">
+          <div class="sbSectionTitle"><span>教科</span><span id="subjectCountText">0件</span></div>
+          <div class="sbList" id="subjectList"></div>
+        </section>
+
+        <!-- Unit -->
+        <section class="sbSection" id="sbUnit">
+          <div class="sbSectionTitle"><span>単元</span><span id="unitHint">教科を選ぶと絞れます</span></div>
+          <div class="sbList" id="unitList"></div>
+        </section>
+
+        <div class="hintBox" id="hintBox">
+          ・教材カードを押して「ひらく」<br>
+          ・「作成」は端末内に保存（別端末には出ません）<br>
+          ・全端末で使うなら、HTMLを書き出してGitHubに置く
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+      <header class="topPanel">
+        <div class="topRow">
+          <div class="titleBox">
+            <h1>えいき教材ポータル</h1>
+            <p>教科 → 単元でしぼりこみ → カードで開く（検索もOK）</p>
+          </div>
+
+          <div class="searchBox" title="検索（例：数量 / ならべ / 合成分解）">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M10.5 18.5a8 8 0 1 1 0-16 8 8 0 0 1 0 16Z" stroke="#111" stroke-width="3" stroke-linecap="round"/>
+              <path d="M16.5 16.5 21 21" stroke="#111" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+            <input id="searchInput" type="text" placeholder="検索（例：数量 / 数唱 / 合成分解 / かたち）" />
+          </div>
+        </div>
+
+        <div class="chipRow">
+          <div class="chips" id="kindChips"></div>
+          <div class="rightActions">
+            <button id="btnAll" class="chip on" type="button">すべて</button>
+            <button id="btnUnit" class="chip" type="button">単元</button>
+            <button id="btnPortal" class="chip" type="button">ポータル</button>
+            <button id="btnCreate" class="chip" type="button">作成</button>
+          </div>
+        </div>
+      </header>
+
+      <section class="content" id="content">
+        <!-- List page -->
+        <div id="pageListView">
+          <div class="sectionTop">
+            <div class="badge" id="resultBadge">表示：0件</div>
+            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+              <button id="openCreateQuick" class="btn ghost" type="button">作成</button>
+              <button id="resetFilters" class="btn" type="button">リセット</button>
+            </div>
+          </div>
+
+          <div class="grid" id="grid"></div>
+        </div>
+
+        <!-- Create page -->
+        <div id="pageCreateView" style="display:none;">
+          <div class="sectionTop">
+            <div class="badge">作成（端末内に保存）</div>
+            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+              <button id="backToList" class="btn" type="button">一覧へ</button>
+            </div>
+          </div>
+
+          <div class="formWrap">
+            <div class="panel">
+              <h3>基本情報</h3>
+
+              <div class="row">
+                <label>タイトル</label>
+                <input id="cTitle" type="text" placeholder="例：数量ゲーム いくつ？" />
+              </div>
+
+              <div class="row">
+                <label>教科</label>
+                <select id="cSubject"></select>
+              </div>
+
+              <div class="row">
+                <label>単元</label>
+                <select id="cUnit"></select>
+              </div>
+
+              <div class="row">
+                <label>説明</label>
+                <input id="cDesc" type="text" placeholder="例：みほんとおなじ数量をえらぶ" />
+              </div>
+
+              <div class="row">
+                <label>タグ（任意）</label>
+                <input id="cTags" type="text" placeholder="例：数量,導入,2択" />
+              </div>
+
+              <div class="row">
+                <label>種類</label>
+                <div class="radioRow">
+                  <div class="radio on" data-mode="url" id="modeUrl">
+                    <input type="radio" name="mode" checked />
+                    URLで開く
+                  </div>
+                  <div class="radio" data-mode="html" id="modeHtml">
+                    <input type="radio" name="mode" />
+                    HTMLを貼る
+                  </div>
+                </div>
+              </div>
+
+              <div id="urlBlock">
+                <div class="row">
+                  <label>URL</label>
+                  <input id="cUrl" type="text" placeholder="例：https://minihole.github.io/..." />
+                </div>
+              </div>
+
+              <div id="htmlBlock" style="display:none;">
+                <div class="row" style="align-items:flex-start;">
+                  <label>HTML</label>
+                  <textarea id="cHtml" placeholder="<!doctype html> から最後 </html> まで全部貼ってOK"></textarea>
+                </div>
+              </div>
+
+              <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top: 8px;">
+                <button id="saveLocal" class="btn black" type="button">端末に保存</button>
+                <button id="exportHtml" class="btn" type="button">HTML書き出し</button>
+                <button id="copySnippet" class="btn ghost" type="button">materials.js用1行コピー</button>
+                <button id="clearForm" class="btn ghost" type="button">入力クリア</button>
+              </div>
+
+              <div class="hintBox" style="margin-top:12px;">
+                ・「端末に保存」→このPC/iPadだけに保存（ブラウザ）<br>
+                ・全端末で使うなら「HTML書き出し」→ GitHubにアップ→ materials.jsに追加
+              </div>
+
+              <div class="panel" style="margin-top:12px;">
+                <h3>materials.js に追加する1行（プレビュー）</h3>
+                <div class="mono" id="snippetPreview" style="white-space:pre-wrap; font-weight:900; font-size:12px; color:rgba(17,17,17,.75);"></div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <h3>プレビュー</h3>
+              <iframe id="previewFrame" class="previewFrame" sandbox="allow-scripts allow-forms allow-modals allow-popups allow-same-origin"></iframe>
+              <div class="hintBox" style="margin-top:12px;">
+                ・HTML貼り付けモードの時だけプレビューが動きます<br>
+                ・URLモードは「ひらく」で確認してください
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Optional: load published materials list -->
+  <script>
+    /* materials.js がある場合は window.MATERIALS を使う想定 */
+  </script>
+  <script src="./materials.js"></script>
+
+  <script>
+    /************************************************************
+     * えいき教材ポータル（GitHub Pages / 1ファイル）
+     * - 教科/単元/種類/検索で絞り込み
+     * - ローカル保存（端末のみ）
+     * - HTML貼り付け→プレビュー→書き出し→GitHubに置ける
+     * - ローカル教材はカードから削除可能
+     ************************************************************/
+
+    const STORAGE_KEY = "tokushi_portal_local_v2";
+
+    // 既定の教科/単元（作成フォーム用）
+    const SUBJECTS = [
+      { key: "算数", units: ["数量", "数唱", "ならべる", "合成分解", "かたち", "くらべる", "時計", "お金", "その他"] },
+      { key: "国語", units: ["語彙", "絵↔ことば", "ひらがな", "ことば作り", "文", "読解", "その他"] },
+      { key: "生活", units: ["買い物", "マナー", "清掃", "調理", "安全", "その他"] },
+      { key: "自立活動", units: ["SST", "コミュニケーション", "感覚", "身体", "その他"] },
+      { key: "ICTツール", units: ["ポータル", "作成ツール", "印刷", "変換", "その他"] },
+      { key: "その他", units: ["未分類"] },
+    ];
+
+    // 種類（materials.js の tags と連動してもOK）
+    const KINDS = [
+      { key: "単元", label: "単元" },
+      { key: "ポータル", label: "ポータル" },
+      { key: "作成", label: "作成" },
+      { key: "ツール", label: "ツール" },
+    ];
+
+    const $ = (id) => document.getElementById(id);
+
+    const appEl = $("app");
+    const toastEl = $("toast");
+    const errBarEl = $("errBar");
+
+    const state = {
+      page: "list",             // list | create
+      sbCollapsed: false,
+      subject: "すべて",
+      unit: "すべて",
+      kind: "すべて",
+      search: "",
+    };
+
+    function uid(){
+      return "m-" + Math.random().toString(36).slice(2,10) + "-" + Math.random().toString(36).slice(2,6);
+    }
+
+    function safeArray(x){ return Array.isArray(x) ? x : []; }
+
+    function loadLocal(){
+      try{
+        const raw = localStorage.getItem(STORAGE_KEY);
+        const data = raw ? JSON.parse(raw) : [];
+        return safeArray(data);
+      }catch(e){
+        return [];
+      }
+    }
+
+    function saveLocal(list){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    }
+
+    function showToast(msg){
+      toastEl.textContent = msg;
+      toastEl.classList.add("on");
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(()=>toastEl.classList.remove("on"), 1200);
+    }
+
+    function setError(msg){
+      errBarEl.style.display = "block";
+      errBarEl.innerHTML = `表示できませんでした： <code>${escapeHtml(String(msg)).slice(0,220)}</code>`;
+    }
+
+    function escapeHtml(s){
+      return s.replace(/[&<>"']/g, (c)=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    }
+
+    function normalizeTags(tags){
+      if (!tags) return [];
+      if (Array.isArray(tags)) return tags.map(String).map(t=>t.trim()).filter(Boolean);
+      return String(tags).split(",").map(t=>t.trim()).filter(Boolean);
+    }
+
+    function getAllMaterials(){
+      const published = safeArray(window.MATERIALS).map(m => ({
+        ...m,
+        _local: false,
+        tags: normalizeTags(m.tags),
+      }));
+      const local = loadLocal().map(m => ({
+        ...m,
+        _local: true,
+        tags: normalizeTags(m.tags),
+      }));
+      // ローカルを先に表示したい場合は local.concat(published)
+      return local.concat(published);
+    }
+
+    function deriveSubjects(materials){
+      const set = new Set();
+      for (const m of materials){
+        if (m.subject) set.add(String(m.subject));
+      }
+      // 既定の順序を優先しつつ、未知教科も追加
+      const ordered = SUBJECTS.map(s=>s.key).filter(k=>set.has(k));
+      for (const k of set){
+        if (!ordered.includes(k)) ordered.push(k);
+      }
+      return ordered;
+    }
+
+    function deriveUnits(materials, subject){
+      const set = new Set();
+      for (const m of materials){
+        if (subject !== "すべて" && String(m.subject) !== subject) continue;
+        if (m.unit) set.add(String(m.unit));
+      }
+      const base = SUBJECTS.find(s=>s.key===subject)?.units || [];
+      const ordered = [...base.filter(u=>set.has(u))];
+      for (const u of set){
+        if (!ordered.includes(u)) ordered.push(u);
+      }
+      return ordered;
+    }
+
+    function countBy(materials, key, filterFn){
+      const map = new Map();
+      for (const m of materials){
+        if (filterFn && !filterFn(m)) continue;
+        const k = m[key] ? String(m[key]) : "未分類";
+        map.set(k, (map.get(k) || 0) + 1);
+      }
+      return map;
+    }
+
+    function buildThumb(m){
+      // 1) thumb 指定があるならそれを使う（相対/絶対どちらでもOK）
+      if (m.thumb){
+        return `<img src="${escapeHtml(String(m.thumb))}" alt="">`;
+      }
+      // 2) thumbs/{id}.png を試す（無くても壊れない）
+      const guess = m.id ? `./thumbs/${encodeURIComponent(String(m.id))}.png` : "";
+      // 画像が無い場合の表示崩れを避けるため、onerrorで消す
+      if (guess){
+        return `<img src="${guess}" alt="" onerror="this.style.display='none'">`;
+      }
+      return "";
+    }
+
+    function materialKinds(m){
+      // kind フィルタ用：tags から推定（無ければsubject/unitの有無）
+      const tags = normalizeTags(m.tags).map(t=>t.toLowerCase());
+      if (tags.includes("ポータル") || tags.includes("portal")) return "ポータル";
+      if (tags.includes("作成") || tags.includes("create")) return "作成";
+      if (tags.includes("ツール") || tags.includes("tool")) return "ツール";
+      // urlが本ページならポータル扱い
+      if (m.url && String(m.url).includes("/tokushi-tools/")) return "ポータル";
+      return "単元";
+    }
+
+    function matchesSearch(m, q){
+      if (!q) return true;
+      const s = q.toLowerCase();
+      const hay = [
+        m.title, m.subject, m.unit, m.desc,
+        ...(normalizeTags(m.tags) || []),
+        m.id,
+      ].filter(Boolean).join(" ").toLowerCase();
+      return hay.includes(s);
+    }
+
+    function filteredMaterials(all){
+      return all.filter(m=>{
+        // subject
+        if (state.subject !== "すべて"){
+          if (String(m.subject || "未分類") !== state.subject) return false;
+        }
+        // unit
+        if (state.unit !== "すべて"){
+          if (String(m.unit || "未分類") !== state.unit) return false;
+        }
+        // kind
+        if (state.kind !== "すべて"){
+          if (materialKinds(m) !== state.kind) return false;
+        }
+        // search
+        if (!matchesSearch(m, state.search)) return false;
+        return true;
+      });
+    }
+
+    function iconSvg(name){
+      // できるだけ誤解しにくいシンプルな線画
+      const common = `fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"`;
+      if (name === "list"){
+        return `<svg viewBox="0 0 24 24" ${common}><path d="M6 7h14"/><path d="M6 12h14"/><path d="M6 17h14"/><path d="M4 7h0"/><path d="M4 12h0"/><path d="M4 17h0"/></svg>`;
+      }
+      if (name === "create"){
+        return `<svg viewBox="0 0 24 24" ${common}><path d="M12 5v14"/><path d="M5 12h14"/></svg>`;
+      }
+      if (name === "subject"){
+        return `<svg viewBox="0 0 24 24" ${common}><path d="M5 4h14v16H5z"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h5"/></svg>`;
+      }
+      if (name === "unit"){
+        return `<svg viewBox="0 0 24 24" ${common}><path d="M6 6h12v12H6z"/><path d="M6 10h12"/><path d="M10 6v12"/></svg>`;
+      }
+      return `<svg viewBox="0 0 24 24" ${common}><path d="M12 4v16"/><path d="M4 12h16"/></svg>`;
+    }
+
+    function sbItemTemplate({ id, title, sub, count, on, icon, onClick }){
+      const el = document.createElement("div");
+      el.className = "sbItem" + (on ? " on" : "");
+      el.setAttribute("role","button");
+      el.setAttribute("tabindex","0");
+      el.dataset.id = id;
+      el.innerHTML = `
+        <div class="sbLeft">
+          <div class="sbIcon" aria-hidden="true">${icon}</div>
+          <div class="sbText">
+            <b>${escapeHtml(title)}</b>
+            ${sub ? `<span>${escapeHtml(sub)}</span>` : `<span></span>`}
+          </div>
+        </div>
+        ${typeof count === "number" ? `<div class="sbCount">${count}</div>` : ``}
+      `;
+      const act = ()=> onClick && onClick();
+      el.addEventListener("click", act);
+      el.addEventListener("keydown", (e)=>{
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); act(); }
+      });
+      return el;
+    }
+
+    function renderSidebar(all, filtered){
+      // Pages
+      const pageList = $("pageList");
+      pageList.innerHTML = "";
+      pageList.appendChild(sbItemTemplate({
+        id:"page-list",
+        title:"一覧",
+        sub:"教材を探す",
+        count:null,
+        on: state.page === "list",
+        icon: iconSvg("list"),
+        onClick: ()=>{
+          state.page = "list";
+          render();
+        }
+      }));
+      pageList.appendChild(sbItemTemplate({
+        id:"page-create",
+        title:"作成",
+        sub:"端末に保存",
+        count:null,
+        on: state.page === "create",
+        icon: iconSvg("create"),
+        onClick: ()=>{
+          state.page = "create";
+          render();
+        }
+      }));
+
+      // Subject
+      const subjectList = $("subjectList");
+      const subjects = deriveSubjects(all);
+      const subjCount = countBy(all, "subject");
+      $("subjectCountText").textContent = `${all.length}件`;
+
+      subjectList.innerHTML = "";
+      subjectList.appendChild(sbItemTemplate({
+        id:"subj-all",
+        title:"すべて",
+        sub:"全部表示",
+        count: all.length,
+        on: state.subject === "すべて",
+        icon: iconSvg("subject"),
+        onClick: ()=>{
+          state.subject = "すべて";
+          state.unit = "すべて";
+          render();
+        }
+      }));
+      for (const s of subjects){
+        const c = subjCount.get(s) || 0;
+        subjectList.appendChild(sbItemTemplate({
+          id:`subj-${s}`,
+          title: s,
+          sub: "この教科だけ",
+          count: c,
+          on: state.subject === s,
+          icon: iconSvg("subject"),
+          onClick: ()=>{
+            state.subject = s;
+            state.unit = "すべて";
+            render();
+          }
+        }));
+      }
+
+      // Unit
+      const unitList = $("unitList");
+      const units = deriveUnits(all, state.subject);
+      const unitCount = countBy(all, "unit", (m)=>{
+        if (state.subject !== "すべて") return String(m.subject||"未分類") === state.subject;
+        return true;
+      });
+
+      unitList.innerHTML = "";
+      unitList.appendChild(sbItemTemplate({
+        id:"unit-all",
+        title:"すべて",
+        sub:"全単元",
+        count: state.subject === "すべて" ? unitCount.size : (unitCount.get("未分類") ? unitCount.size : unitCount.size),
+        on: state.unit === "すべて",
+        icon: iconSvg("unit"),
+        onClick: ()=>{
+          state.unit = "すべて";
+          render();
+        }
+      }));
+      for (const u of units){
+        const c = unitCount.get(u) || 0;
+        unitList.appendChild(sbItemTemplate({
+          id:`unit-${u}`,
+          title: u,
+          sub: "この単元だけ",
+          count: c,
+          on: state.unit === u,
+          icon: iconSvg("unit"),
+          onClick: ()=>{
+            state.unit = u;
+            render();
+          }
+        }));
+      }
+    }
+
+    function renderChips(all){
+      const wrap = $("kindChips");
+      wrap.innerHTML = "";
+      // 種類チップは「すべて」を含める
+      const kinds = ["すべて", ...KINDS.map(k=>k.key)];
+      for (const k of kinds){
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "chip" + (state.kind === k ? " on" : "");
+        chip.textContent = k;
+        chip.addEventListener("click", ()=>{
+          state.kind = k;
+          render();
+        });
+        wrap.appendChild(chip);
+      }
+
+      // 右アクション（上部の固定チップ）
+      $("btnAll").classList.toggle("on", state.kind === "すべて");
+      $("btnUnit").classList.toggle("on", state.kind === "単元");
+      $("btnPortal").classList.toggle("on", state.kind === "ポータル");
+      $("btnCreate").classList.toggle("on", state.kind === "作成");
+    }
+
+    function openMaterial(m){
+      if (m._local && m.html){
+        const blob = new Blob([String(m.html)], { type: "text/html;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        window.open(url, "_blank", "noopener,noreferrer");
+        setTimeout(()=>URL.revokeObjectURL(url), 30_000);
+        return;
+      }
+      if (m.url){
+        window.open(String(m.url), "_blank", "noopener,noreferrer");
+        return;
+      }
+      showToast("URLがありません");
+    }
+
+    function deleteMaterial(m){
+      if (!m._local) return;
+      if (!confirm("この端末の保存から削除します。よろしいですか？")) return;
+      const local = loadLocal().filter(x => x.id !== m.id);
+      saveLocal(local);
+      showToast("削除しました");
+      render();
+    }
+
+    function renderCard(m){
+      const kind = materialKinds(m);
+      const el = document.createElement("div");
+      el.className = "card";
+
+      const label = `${m.subject || "未分類"} / ${m.unit || "未分類"}`;
+      const tags = normalizeTags(m.tags);
+
+      el.innerHTML = `
+        <div class="thumb">
+          ${buildThumb(m)}
+          <div class="thumbLabel">${escapeHtml(label)}</div>
+          <div class="thumbRight">
+            <span class="pill">${escapeHtml(kind)}</span>
+            ${m._local ? `<span class="pill">端末</span>` : ``}
+          </div>
+        </div>
+        <div class="cardBody">
+          <h3 class="cardTitle">${escapeHtml(m.title || "（無題）")}</h3>
+          <p class="cardDesc">${escapeHtml(m.desc || "説明なし")}</p>
+          <div class="tagRow">
+            ${tags.slice(0,4).map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join("")}
+          </div>
+          <div class="cardActions">
+            <div class="idText">ID: ${escapeHtml(String(m.id || ""))}</div>
+            <div class="actionBtns" id="actions"></div>
+          </div>
+        </div>
+      `;
+
+      const actions = el.querySelector("#actions");
+
+      const openBtn = document.createElement("button");
+      openBtn.className = "btn black";
+      openBtn.type = "button";
+      openBtn.textContent = "ひらく";
+      openBtn.onclick = (e)=>{ e.preventDefault(); openMaterial(m); };
+      actions.appendChild(openBtn);
+
+      if (m._local){
+        const delBtn = document.createElement("button");
+        delBtn.className = "btn ghost";
+        delBtn.type = "button";
+        delBtn.textContent = "削除";
+        delBtn.onclick = (e)=>{ e.preventDefault(); deleteMaterial(m); };
+        actions.appendChild(delBtn);
+      }
+
+      return el;
+    }
+
+    function renderListPage(all){
+      const grid = $("grid");
+      grid.innerHTML = "";
+      const list = filteredMaterials(all);
+
+      $("resultBadge").textContent = `表示：${list.length}件 / 全${all.length}件`;
+
+      if (list.length === 0){
+        const empty = document.createElement("div");
+        empty.className = "panel";
+        empty.style.gridColumn = "1 / -1";
+        empty.innerHTML = `
+          <h3>見つかりません</h3>
+          <div class="hintBox">検索や教科/単元/種類をリセットしてみてください。</div>
+        `;
+        grid.appendChild(empty);
+        return;
+      }
+
+      for (const m of list){
+        grid.appendChild(renderCard(m));
+      }
+    }
+
+    function setPage(page){
+      state.page = page;
+      render();
+    }
+
+    // Create page helpers
+    function fillSubjectUnit(){
+      const subjSel = $("cSubject");
+      const unitSel = $("cUnit");
+      subjSel.innerHTML = "";
+      for (const s of SUBJECTS){
+        const opt = document.createElement("option");
+        opt.value = s.key;
+        opt.textContent = s.key;
+        subjSel.appendChild(opt);
+      }
+
+      function fillUnits(){
+        const key = subjSel.value;
+        const units = SUBJECTS.find(s=>s.key===key)?.units || ["未分類"];
+        unitSel.innerHTML = "";
+        for (const u of units){
+          const opt = document.createElement("option");
+          opt.value = u;
+          opt.textContent = u;
+          unitSel.appendChild(opt);
+        }
+      }
+      subjSel.addEventListener("change", ()=>{
+        fillUnits();
+        updateSnippetPreview();
+      });
+      unitSel.addEventListener("change", updateSnippetPreview);
+
+      fillUnits();
+    }
+
+    function createSnippet(obj){
+      // materials.js の1行（貼りやすい形）
+      const line = {
+        id: obj.id,
+        title: obj.title,
+        subject: obj.subject,
+        unit: obj.unit,
+        desc: obj.desc,
+        tags: obj.tags,
+        url: obj.url || "",
+        thumb: obj.thumb || "",
+      };
+      // 1行で見たいので JSON 風に
+      return `{ id: "${escapeJs(line.id)}", title: "${escapeJs(line.title)}", subject: "${escapeJs(line.subject)}", unit: "${escapeJs(line.unit)}", desc: "${escapeJs(line.desc)}", tags: ${JSON.stringify(line.tags)}, url: "${escapeJs(line.url)}", thumb: "${escapeJs(line.thumb)}" }`;
+    }
+
+    function escapeJs(s){
+      return String(s || "").replace(/\\/g,"\\\\").replace(/"/g,'\\"').replace(/\n/g,"\\n");
+    }
+
+    function getCreateForm(){
+      const mode = $("modeHtml").classList.contains("on") ? "html" : "url";
+      const title = $("cTitle").value.trim();
+      const subject = $("cSubject").value;
+      const unit = $("cUnit").value;
+      const desc = $("cDesc").value.trim();
+      const tags = $("cTags").value.split(",").map(t=>t.trim()).filter(Boolean);
+
+      if (!title) return { ok:false, msg:"タイトルを入れてください" };
+
+      if (mode === "url"){
+        const url = $("cUrl").value.trim();
+        if (!url) return { ok:false, msg:"URLを入れてください" };
+        return { ok:true, mode, title, subject, unit, desc, tags, url, html:"" };
+      }else{
+        const html = $("cHtml").value;
+        if (!html.trim()) return { ok:false, msg:"HTMLを貼ってください" };
+        return { ok:true, mode, title, subject, unit, desc, tags, url:"", html };
+      }
+    }
+
+    function updatePreview(){
+      const isHtml = $("modeHtml").classList.contains("on");
+      const frame = $("previewFrame");
+      if (!isHtml){
+        frame.srcdoc = `<div style="font-family:system-ui;padding:18px;color:#333;"><b>URLモード</b><div style="margin-top:8px;">プレビューは「HTMLを貼る」モードで表示します。</div></div>`;
+        return;
+      }
+      const html = $("cHtml").value || "";
+      // 安全のため、srcdocで表示
+      frame.srcdoc = html;
+    }
+
+    function updateSnippetPreview(){
+      const f = getCreateForm();
+      if (!f.ok){
+        $("snippetPreview").textContent = "（入力するとここに表示されます）";
+        return;
+      }
+      const temp = {
+        id: "your-id",
+        title: f.title,
+        subject: f.subject,
+        unit: f.unit,
+        desc: f.desc || "",
+        tags: f.tags || [],
+        url: f.mode === "url" ? f.url : "（GitHubに置いたURLに差し替え）",
+        thumb: "（任意：thumbs/〜.png）",
+      };
+      $("snippetPreview").textContent = createSnippet(temp);
+    }
+
+    function switchMode(mode){
+      const isUrl = mode === "url";
+      $("modeUrl").classList.toggle("on", isUrl);
+      $("modeHtml").classList.toggle("on", !isUrl);
+      $("urlBlock").style.display = isUrl ? "block" : "none";
+      $("htmlBlock").style.display = isUrl ? "none" : "block";
+      updatePreview();
+      updateSnippetPreview();
+    }
+
+    function clearForm(){
+      $("cTitle").value = "";
+      $("cDesc").value = "";
+      $("cTags").value = "";
+      $("cUrl").value = "";
+      $("cHtml").value = "";
+      switchMode("url");
+      updateSnippetPreview();
+      showToast("入力をクリアしました");
+    }
+
+    function downloadFile(filename, text){
+      const blob = new Blob([text], { type: "text/html;charset=utf-8" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(()=>URL.revokeObjectURL(a.href), 30_000);
+    }
+
+    function renderCreatePage(){
+      updatePreview();
+      updateSnippetPreview();
+    }
+
+    function render(){
+      errBarEl.style.display = "none";
+
+      const all = getAllMaterials();
+
+      // Sidebar collapsed
+      appEl.classList.toggle("sb-collapsed", !!state.sbCollapsed);
+
+      // Search
+      $("searchInput").value = state.search;
+
+      // Sidebar
+      renderSidebar(all, filteredMaterials(all));
+
+      // Chips
+      renderChips(all);
+
+      // Page toggles
+      $("pageListView").style.display = (state.page === "list") ? "block" : "none";
+      $("pageCreateView").style.display = (state.page === "create") ? "block" : "none";
+
+      if (state.page === "list"){
+        renderListPage(all);
+      }else{
+        renderCreatePage();
+      }
+    }
+
+    function init(){
+      // Sidebar toggle
+      $("toggleSidebar").addEventListener("click", ()=>{
+        state.sbCollapsed = !state.sbCollapsed;
+        render();
+      });
+
+      // Search
+      $("searchInput").addEventListener("input", (e)=>{
+        state.search = e.target.value || "";
+        render();
+      });
+
+      // Top chips quick set
+      $("btnAll").addEventListener("click", ()=>{ state.kind = "すべて"; render(); });
+      $("btnUnit").addEventListener("click", ()=>{ state.kind = "単元"; render(); });
+      $("btnPortal").addEventListener("click", ()=>{ state.kind = "ポータル"; render(); });
+      $("btnCreate").addEventListener("click", ()=>{ state.kind = "作成"; render(); });
+
+      // Quick buttons
+      $("openCreateQuick").addEventListener("click", ()=>setPage("create"));
+      $("backToList").addEventListener("click", ()=>setPage("list"));
+
+      $("resetFilters").addEventListener("click", ()=>{
+        state.subject = "すべて";
+        state.unit = "すべて";
+        state.kind = "すべて";
+        state.search = "";
+        render();
+        showToast("リセットしました");
+      });
+
+      // Create form setup
+      fillSubjectUnit();
+      switchMode("url");
+
+      $("modeUrl").addEventListener("click", ()=>switchMode("url"));
+      $("modeHtml").addEventListener("click", ()=>switchMode("html"));
+
+      $("cTitle").addEventListener("input", updateSnippetPreview);
+      $("cDesc").addEventListener("input", updateSnippetPreview);
+      $("cTags").addEventListener("input", updateSnippetPreview);
+      $("cUrl").addEventListener("input", updateSnippetPreview);
+      $("cHtml").addEventListener("input", ()=>{
+        updatePreview();
+        updateSnippetPreview();
+      });
+
+      $("clearForm").addEventListener("click", clearForm);
+
+      $("saveLocal").addEventListener("click", ()=>{
+        const f = getCreateForm();
+        if (!f.ok){ showToast(f.msg); return; }
+
+        const local = loadLocal();
+        const id = uid();
+        const obj = {
+          id,
+          title: f.title,
+          subject: f.subject,
+          unit: f.unit,
+          desc: f.desc || "",
+          tags: f.tags || [],
+          url: f.mode === "url" ? f.url : "",
+          html: f.mode === "html" ? f.html : "",
+          thumb: "",
+          createdAt: Date.now(),
+        };
+        local.unshift(obj);
+        saveLocal(local);
+        showToast("端末に保存しました");
+        // 一覧へ
+        setPage("list");
+      });
+
+      $("exportHtml").addEventListener("click", ()=>{
+        const f = getCreateForm();
+        if (!f.ok){ showToast(f.msg); return; }
+
+        if (f.mode === "html"){
+          const name = (f.title || "material").replace(/[\\/:*?"<>|]/g,"_").slice(0,50);
+          downloadFile(`${name}.html`, f.html);
+          showToast("HTMLを書き出しました");
+        }else{
+          // URLモードの場合：簡易ランチャーHTMLを書き出す
+          const name = (f.title || "material_link").replace(/[\\/:*?"<>|]/g,"_").slice(0,50);
+          const html = `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(f.title)}</title>
+          <style>body{font-family:system-ui;display:grid;place-items:center;height:100vh;margin:0;background:#f6f3ee;color:#111}a{font-weight:900;font-size:18px;border:3px solid #111;border-radius:999px;padding:14px 18px;text-decoration:none;color:#fff;background:#111}p{margin:12px 0 0;color:rgba(17,17,17,.7);font-weight:800}</style>
+          <a href="${escapeHtml(f.url)}">ひらく</a><p>${escapeHtml(f.desc||"")}</p>`;
+          downloadFile(`${name}.html`, html);
+          showToast("ランチャーHTMLを書き出しました");
+        }
+      });
+
+      $("copySnippet").addEventListener("click", async ()=>{
+        const f = getCreateForm();
+        if (!f.ok){ showToast(f.msg); return; }
+
+        const temp = {
+          id: "your-id",
+          title: f.title,
+          subject: f.subject,
+          unit: f.unit,
+          desc: f.desc || "",
+          tags: f.tags || [],
+          url: f.mode === "url" ? f.url : "（GitHubに置いたURLに差し替え）",
+          thumb: "",
+        };
+        const txt = createSnippet(temp);
+        try{
+          await navigator.clipboard.writeText(txt);
+          showToast("コピーしました");
+        }catch(e){
+          // フォールバック
+          const ta = document.createElement("textarea");
+          ta.value = txt;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          ta.remove();
+          showToast("コピーしました");
+        }
+      });
+
+      updateSnippetPreview();
+
+      render();
+    }
+
+    window.addEventListener("error", (e)=>{
+      setError(e.message || e.error || "unknown error");
+    });
+
+    init();
+  </script>
+
+  <!-- サンプル（materials.js が無い時だけ動く） -->
+  <script>
+    if (!Array.isArray(window.MATERIALS) || window.MATERIALS.length === 0){
+      window.MATERIALS = [
+        { id:"tool-001", title:"授業用ICT教材ポータル（今のページ）", subject:"ICTツール", unit:"ポータル", desc:"カード一覧で教材を探せる入口", tags:["ツール","ポータル","検索"], url:"./index.html", thumb:"" },
+        { id:"tool-002", title:"Create_tool2（今あるページ）", subject:"ICTツール", unit:"作成ツール", desc:"既存ページをカードから開くテスト", tags:["ツール","作成","テスト"], url:"./Create_tool2.html", thumb:"" }
+      ];
+    }
+  </script>
+</body>
+</html>
