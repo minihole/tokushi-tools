@@ -10,21 +10,24 @@
       --paper: #f6f2ea;
       --paper2:#fbf9f4;
       --ink: #141414;
-      --ink2:#2a2a2a;
       --sub: #5a5a5a;
       --line:#1a1a1a;
       --lineSoft: rgba(20,20,20,.14);
 
       /* --- Wood --- */
-      --woodA:#c6a071;
-      --woodB:#b38452;
-      --woodC:#a46d3f;
+      --woodA:#c09362;
+      --woodB:#a87442;
+      --woodC:#8b5a2b;
 
       /* --- UI --- */
       --card:#ffffff;
       --radius: 16px;
       --shadow: 0 10px 26px rgba(10,10,10,.10);
       --shadow2: 0 6px 18px rgba(10,10,10,.08);
+
+      /* Sidebar */
+      --sidebarW: 296px;
+      --sidebarWCollapsed: 74px;
     }
 
     *{ box-sizing:border-box; }
@@ -38,7 +41,7 @@
       overflow-x:hidden;
     }
 
-    /* --- Subtle paper noise (no external assets) --- */
+    /* Paper-ish subtle noise (no external assets) */
     body::before{
       content:"";
       position:fixed; inset:0;
@@ -55,19 +58,263 @@
       filter: contrast(105%);
     }
 
-    /* --- Layout --- */
-    .wrap{ max-width: 1140px; margin: 0 auto; padding: 16px 18px; }
+    /* ===== App layout ===== */
+    .app{
+      position:relative;
+      min-height:100vh;
+      display:flex;
+      align-items:stretch;
+    }
+
+    /* ===== Sidebar ===== */
+    .sidebar{
+      width: var(--sidebarW);
+      border-right: 2px solid var(--line);
+      background: rgba(255,255,255,.70);
+      backdrop-filter: blur(10px);
+      box-shadow: 10px 0 26px rgba(10,10,10,.05);
+      position:sticky;
+      top:0;
+      height:100vh;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      z-index:20;
+    }
+
+    .sidebarInner{
+      padding: 12px 10px 12px 10px;
+      overflow:auto;
+      height:100%;
+    }
+
+    .sbTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding: 6px 6px 10px;
+    }
+
+    .sbBrand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+
+    .sbLogo{
+      width:40px; height:40px;
+      border:2px solid var(--line);
+      border-radius: 12px;
+      background:
+        repeating-linear-gradient(90deg, rgba(0,0,0,.06) 0 10px, rgba(0,0,0,0) 10px 18px),
+        linear-gradient(135deg, var(--woodA), var(--woodB));
+      box-shadow: var(--shadow2);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex:0 0 auto;
+    }
+    .sbLogo svg{ opacity:.92; }
+
+    .sbTitle{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      min-width:0;
+    }
+    .sbTitle b{
+      font-size: 14px;
+      letter-spacing:.02em;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .sbTitle span{
+      font-size: 12px;
+      color: rgba(20,20,20,.62);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .sbToggle{
+      border:2px solid var(--line);
+      background: rgba(255,255,255,.85);
+      border-radius: 999px;
+      padding: 8px 10px;
+      font-weight: 900;
+      cursor:pointer;
+      box-shadow: var(--shadow2);
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      user-select:none;
+    }
+    .sbToggle:hover{ transform: translateY(-1px); }
+    .sbToggle:active{ transform: translateY(0px); }
+    .sbToggle svg{ flex:0 0 auto; }
+
+    .sbSection{
+      border-top: 2px solid rgba(20,20,20,.12);
+      padding-top: 10px;
+      margin-top: 10px;
+    }
+    .sbSectionTitle{
+      font-size: 12px;
+      color: rgba(20,20,20,.68);
+      font-weight: 950;
+      letter-spacing:.04em;
+      padding: 0 6px 8px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+    }
+    .sbSectionTitle .mini{
+      font-weight: 900;
+      color: rgba(20,20,20,.52);
+    }
+
+    .sbList{
+      display:flex;
+      flex-direction:column;
+      gap: 6px;
+      padding: 0 4px 2px;
+    }
+
+    .sbItem{
+      border:2px solid rgba(20,20,20,.18);
+      background: rgba(255,255,255,.88);
+      border-radius: 14px;
+      padding: 10px 10px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      cursor:pointer;
+      user-select:none;
+      box-shadow: 0 8px 16px rgba(10,10,10,.06);
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
+    }
+    .sbItem:hover{ transform: translateY(-1px); }
+    .sbItem.active{
+      background: rgba(20,20,20,.92);
+      color:#fff;
+      border-color: var(--line);
+    }
+
+    .sbLeft{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+    .sbIcon{
+      width:34px; height:34px;
+      border-radius: 12px;
+      border:2px solid var(--line);
+      background: rgba(255,255,255,.86);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex:0 0 auto;
+      box-shadow: var(--shadow2);
+    }
+    .sbItem.active .sbIcon{
+      background: rgba(255,255,255,.12);
+      border-color: rgba(255,255,255,.65);
+    }
+    .sbText{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      min-width:0;
+    }
+    .sbText b{
+      font-size: 14px;
+      font-weight: 950;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .sbText span{
+      font-size: 12px;
+      color: rgba(20,20,20,.62);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .sbItem.active .sbText span{ color: rgba(255,255,255,.72); }
+
+    .sbCount{
+      font-size: 12px;
+      font-weight: 950;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 2px solid rgba(20,20,20,.22);
+      background: rgba(255,255,255,.78);
+      color: rgba(20,20,20,.85);
+      flex:0 0 auto;
+    }
+    .sbItem.active .sbCount{
+      border-color: rgba(255,255,255,.55);
+      background: rgba(255,255,255,.12);
+      color:#fff;
+    }
+
+    .sbHint{
+      margin-top: 10px;
+      padding: 10px 10px;
+      border-radius: 14px;
+      border:2px dashed rgba(20,20,20,.28);
+      background: rgba(255,255,255,.65);
+      color: rgba(20,20,20,.66);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    /* ===== Sidebar collapsed (desktop/tablet) ===== */
+    .app.sb-collapsed .sidebar{
+      width: var(--sidebarWCollapsed);
+    }
+    .app.sb-collapsed .sbTitle,
+    .app.sb-collapsed .sbSectionTitle span,
+    .app.sb-collapsed .sbText,
+    .app.sb-collapsed .sbCount,
+    .app.sb-collapsed .sbHint{
+      display:none;
+    }
+    .app.sb-collapsed .sbToggle{
+      padding: 8px 10px;
+    }
+    .app.sb-collapsed .sbItem{
+      justify-content:center;
+      padding: 10px;
+    }
+    .app.sb-collapsed .sbLeft{
+      gap:0;
+    }
+
+    /* ===== Main area ===== */
+    .main{
+      flex:1 1 auto;
+      min-width:0;
+    }
+
+    .wrap{ max-width: 1160px; margin: 0 auto; padding: 16px 18px; }
 
     header{
-      position: sticky;
-      top: 0;
-      z-index: 10;
+      position:sticky;
+      top:0;
+      z-index: 15; /* under sidebar (20) */
       border-bottom: 2px solid var(--line);
       background: rgba(246,242,234,.88);
       backdrop-filter: blur(10px);
     }
 
-    /* Wood strip like a desk edge */
+    /* Wood strip like desk edge */
     .woodbar{
       position: relative;
       border: 2px solid var(--line);
@@ -169,7 +416,7 @@
       padding: 7px 12px;
       border-radius: 999px;
       font-size: 13px;
-      font-weight: 800;
+      font-weight: 900;
       cursor:pointer;
       user-select:none;
       transition: transform .12s ease, background .12s ease;
@@ -181,7 +428,6 @@
       color: #fff;
     }
 
-    /* Nature line art (pure SVG) */
     .nature{
       position:absolute;
       right: 10px;
@@ -191,10 +437,6 @@
       opacity: .22;
       pointer-events:none;
       filter: drop-shadow(0 1px 0 rgba(255,255,255,.25));
-    }
-    @media (max-width: 720px){
-      .nature{ display:none; }
-      .search{ min-width: 100%; }
     }
 
     main .wrap{ padding-top: 18px; padding-bottom: 28px; }
@@ -266,10 +508,11 @@
       justify-content:center;
       text-align:center;
       padding: 10px;
-      font-weight: 900;
+      font-weight: 950;
       color: rgba(20,20,20,.72);
       letter-spacing: .04em;
       background: rgba(255,255,255,.75);
+      white-space:pre-line;
     }
 
     .body{
@@ -280,7 +523,7 @@
     }
     .titleText{
       font-size: 16px;
-      font-weight: 900;
+      font-weight: 950;
       line-height: 1.2;
     }
     .desc{
@@ -302,7 +545,7 @@
       border: 2px solid rgba(20,20,20,.22);
       background: rgba(255,255,255,.86);
       color: var(--ink);
-      font-weight: 900;
+      font-weight: 950;
     }
     .tag.subject{ background: rgba(20,20,20,.92); color: #fff; border-color: var(--line); }
     .tag.unit{ border-color: rgba(20,20,20,.40); }
@@ -345,7 +588,7 @@
     .small{
       font-size: 12px;
       color: rgba(20,20,20,.55);
-      font-weight: 800;
+      font-weight: 900;
       margin-left:auto;
     }
 
@@ -369,77 +612,178 @@
       padding: 14px 18px 26px;
     }
 
+    /* ===== Mobile/tablet drawer behavior ===== */
+    @media (max-width: 920px){
+      .sidebar{
+        position:fixed;
+        left:0; top:0;
+        transform: translateX(-110%);
+        transition: transform .18s ease;
+        box-shadow: 18px 0 40px rgba(0,0,0,.18);
+      }
+      .app.sb-open .sidebar{
+        transform: translateX(0);
+      }
+      .overlay{
+        display:none;
+      }
+      .app.sb-open .overlay{
+        display:block;
+        position:fixed;
+        inset:0;
+        background: rgba(0,0,0,.28);
+        z-index: 18;
+      }
+    }
+
+    /* Small: hide nature art */
+    @media (max-width: 720px){
+      .nature{ display:none; }
+      .search{ min-width: 100%; }
+    }
+
     @media (prefers-reduced-motion: reduce){
-      .chip, .btn{ transition:none; }
+      .chip, .btn, .sbItem{ transition:none; }
+      .sidebar{ transition:none; }
     }
   </style>
 </head>
 
 <body>
-  <header>
-    <div class="wrap">
-      <div class="woodbar">
-        <div class="headInner">
-          <div class="title">
-            <h1>えいき教材ポータル</h1>
-            <div class="note">教科でしぼりこみ → カードを押して教材を開く（検索もOK）</div>
-          </div>
+  <div class="app" id="app">
+    <!-- Overlay for mobile drawer -->
+    <div class="overlay" id="overlay" aria-hidden="true"></div>
 
-          <div class="right">
-            <div class="search" title="タイトル/説明/タグを検索">
-              <!-- Magnifier icon (SVG / no emoji) -->
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" stroke="#141414" stroke-width="2.4"/>
-                <path d="M16.8 16.8 21 21" stroke="#141414" stroke-width="2.4" stroke-linecap="round"/>
+    <!-- ===== Sidebar ===== -->
+    <aside class="sidebar" aria-label="サイドバー">
+      <div class="sidebarInner">
+        <div class="sbTop">
+          <div class="sbBrand">
+            <div class="sbLogo" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                <path d="M6 18c0-4 3-8 6-8s6 4 6 8" stroke="#141414" stroke-width="2.2" stroke-linecap="round"/>
+                <path d="M12 3v7" stroke="#141414" stroke-width="2.2" stroke-linecap="round"/>
+                <path d="M7 21h10" stroke="#141414" stroke-width="2.2" stroke-linecap="round"/>
               </svg>
-              <input id="q" placeholder="検索（例：数量 / ならべ / かたち）" />
+            </div>
+            <div class="sbTitle">
+              <b>えいき教材ポータル</b>
+              <span>カテゴリですぐ移動</span>
             </div>
           </div>
 
-          <!-- Nature line illustration -->
-          <svg class="nature" viewBox="0 0 520 180" fill="none" aria-hidden="true">
-            <path d="M20 140 C70 95, 110 85, 150 110 C200 75, 250 70, 295 100 C340 60, 400 60, 500 120"
-              stroke="#141414" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M80 150 L95 110 L110 150 Z" stroke="#141414" stroke-width="6" stroke-linejoin="round"/>
-            <path d="M100 150 V165" stroke="#141414" stroke-width="6" stroke-linecap="round"/>
-            <path d="M170 150 L190 105 L210 150 Z" stroke="#141414" stroke-width="6" stroke-linejoin="round"/>
-            <path d="M190 150 V168" stroke="#141414" stroke-width="6" stroke-linecap="round"/>
-            <path d="M420 148 C440 130, 460 130, 480 148" stroke="#141414" stroke-width="6" stroke-linecap="round"/>
-            <path d="M430 150 C452 158, 468 158, 490 150" stroke="#141414" stroke-width="6" stroke-linecap="round"/>
-          </svg>
+          <button class="sbToggle" id="sbToggle" title="サイドバーを開閉">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M4 7h16M4 12h16M4 17h16" stroke="#141414" stroke-width="2.4" stroke-linecap="round"/>
+            </svg>
+            <span class="sbToggleText" id="sbToggleText">収納</span>
+          </button>
         </div>
 
-        <div class="chipRow" id="subjectChips"></div>
+        <div class="sbSection">
+          <div class="sbSectionTitle">
+            <span>教科</span>
+            <span class="mini" id="sbMiniAll"></span>
+          </div>
+          <div class="sbList" id="sbSubjects"></div>
+        </div>
+
+        <div class="sbSection">
+          <div class="sbSectionTitle">
+            <span>カテゴリ</span>
+            <span class="mini" id="sbMiniUnit"></span>
+          </div>
+          <div class="sbList" id="sbUnits"></div>
+        </div>
+
+        <div class="sbHint">
+          ✅ 追加：<b>materials.js</b> に1つ追加<br/>
+          ✅ サムネ：<b>thumbs/</b> に画像を置く（任意）
+        </div>
+      </div>
+    </aside>
+
+    <!-- ===== Main ===== -->
+    <div class="main">
+      <header>
+        <div class="wrap">
+          <div class="woodbar">
+            <div class="headInner">
+              <div class="title">
+                <h1>えいき教材ポータル</h1>
+                <div class="note">教科でしぼりこみ → カードを押して教材を開く（検索もOK）</div>
+              </div>
+
+              <div class="right">
+                <div class="search" title="タイトル/説明/タグを検索">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" stroke="#141414" stroke-width="2.4"/>
+                    <path d="M16.8 16.8 21 21" stroke="#141414" stroke-width="2.4" stroke-linecap="round"/>
+                  </svg>
+                  <input id="q" placeholder="検索（例：数量 / ならべ / かたち）" />
+                </div>
+              </div>
+
+              <!-- Nature line illustration -->
+              <svg class="nature" viewBox="0 0 520 180" fill="none" aria-hidden="true">
+                <path d="M20 140 C70 95, 110 85, 150 110 C200 75, 250 70, 295 100 C340 60, 400 60, 500 120"
+                  stroke="#141414" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M80 150 L95 110 L110 150 Z" stroke="#141414" stroke-width="6" stroke-linejoin="round"/>
+                <path d="M100 150 V165" stroke="#141414" stroke-width="6" stroke-linecap="round"/>
+                <path d="M170 150 L190 105 L210 150 Z" stroke="#141414" stroke-width="6" stroke-linejoin="round"/>
+                <path d="M190 150 V168" stroke="#141414" stroke-width="6" stroke-linecap="round"/>
+                <path d="M420 148 C440 130, 460 130, 480 148" stroke="#141414" stroke-width="6" stroke-linecap="round"/>
+                <path d="M430 150 C452 158, 468 158, 490 150" stroke="#141414" stroke-width="6" stroke-linecap="round"/>
+              </svg>
+            </div>
+
+            <!-- Top chips stay (quick filter) -->
+            <div class="chipRow" id="subjectChips"></div>
+          </div>
+        </div>
+      </header>
+
+      <main>
+        <div class="wrap">
+          <div id="warn" class="warn"></div>
+
+          <div class="row">
+            <div class="count" id="count"></div>
+            <div class="chipRow" id="unitChips" style="padding:0;"></div>
+          </div>
+
+          <div class="grid" id="grid"></div>
+        </div>
+      </main>
+
+      <div class="footer">
+        <div>追加：<b>materials.js</b> に1つ追加 →（任意）<b>thumbs/</b> にサムネ → 教材ファイルを置く</div>
       </div>
     </div>
-  </header>
-
-  <main>
-    <div class="wrap">
-      <div id="warn" class="warn"></div>
-
-      <div class="row">
-        <div class="count" id="count"></div>
-        <div class="chipRow" id="unitChips" style="padding:0;"></div>
-      </div>
-
-      <div class="grid" id="grid"></div>
-    </div>
-  </main>
-
-  <div class="footer">
-    <div>追加：<b>materials.js</b> に1つ追加 →（任意）<b>thumbs/</b> にサムネ → 教材ファイルを置く</div>
   </div>
 
   <script src="./materials.js"></script>
   <script>
+    // ===== Elements =====
+    const app = document.getElementById("app");
+    const overlay = document.getElementById("overlay");
+    const sbToggle = document.getElementById("sbToggle");
+    const sbToggleText = document.getElementById("sbToggleText");
+
     const WARN = document.getElementById("warn");
     const qEl = document.getElementById("q");
+
     const subjectChips = document.getElementById("subjectChips");
     const unitChips = document.getElementById("unitChips");
     const grid = document.getElementById("grid");
     const count = document.getElementById("count");
 
+    const sbSubjects = document.getElementById("sbSubjects");
+    const sbUnits = document.getElementById("sbUnits");
+    const sbMiniAll = document.getElementById("sbMiniAll");
+    const sbMiniUnit = document.getElementById("sbMiniUnit");
+
+    // ===== Data =====
     const raw = window.TOKUSHI_MATERIALS;
     if (!Array.isArray(raw)) {
       WARN.style.display = "block";
@@ -448,15 +792,42 @@
     }
     const MATERIALS = Array.isArray(raw) ? raw : [];
 
-    const state = { subject: "すべて", unit: "すべて", q: "" };
+    // ===== State =====
+    const state = {
+      subject: "すべて",
+      unit: "すべて",
+      q: "",
+    };
 
+    // Sidebar open/collapse memory
+    const ui = {
+      collapsed: localStorage.getItem("sbCollapsed") === "1",
+      openMobile: false,
+    };
+
+    // ===== Helpers =====
     function uniq(arr){ return [...new Set(arr)].filter(Boolean); }
-    function subjects(){ return ["すべて", ...uniq(MATERIALS.map(m => m.subject))]; }
-    function units(){
+    function byCountLabel(label, items){
+      return items.filter(m => (label === "すべて" ? true : m === label)).length;
+    }
+
+    function listSubjects(){
+      return ["すべて", ...uniq(MATERIALS.map(m => m.subject))];
+    }
+    function listUnits(){
       const base = MATERIALS
         .filter(m => state.subject === "すべて" ? true : m.subject === state.subject)
         .map(m => m.unit);
       return ["すべて", ...uniq(base)];
+    }
+
+    function countBySubject(s){
+      return MATERIALS.filter(m => (s === "すべて" ? true : m.subject === s)).length;
+    }
+    function countByUnit(u){
+      return MATERIALS
+        .filter(m => state.subject === "すべて" ? true : m.subject === state.subject)
+        .filter(m => (u === "すべて" ? true : m.unit === u)).length;
     }
 
     function makeChip(label, active, onClick){
@@ -467,25 +838,62 @@
       return b;
     }
 
-    function renderChips(){
-      subjectChips.innerHTML = "";
-      subjects().forEach(s=>{
-        subjectChips.appendChild(makeChip(s, state.subject===s, ()=>{
-          state.subject = s;
-          state.unit = "すべて";
-          render();
-        }));
-      });
-
-      unitChips.innerHTML = "";
-      units().forEach(u=>{
-        unitChips.appendChild(makeChip(u, state.unit===u, ()=>{
-          state.unit = u;
-          render();
-        }));
-      });
+    function iconForSubject(subject){
+      // simple, no emojis: small svg variations
+      // default: book
+      const s = String(subject || "");
+      if (s.includes("算") || s.includes("数学")) return "calc";
+      if (s.includes("国") || s.includes("語")) return "book";
+      if (s.includes("生") || s.includes("生活")) return "leaf";
+      if (s.includes("ツ") || s.includes("tool") || s.includes("Tool")) return "wrench";
+      return "book";
+    }
+    function svgIcon(kind, color){
+      const c = color || "#141414";
+      if (kind === "calc") {
+        return `
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" stroke="${c}" stroke-width="2.2"/>
+            <path d="M8 7h8" stroke="${c}" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M8 11h3M13 11h3M8 15h3M13 15h3" stroke="${c}" stroke-width="2.2" stroke-linecap="round"/>
+          </svg>`;
+      }
+      if (kind === "leaf") {
+        return `
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M20 4c-8 1-13 6-14 14 8-1 13-6 14-14Z" stroke="${c}" stroke-width="2.2" stroke-linejoin="round"/>
+            <path d="M6 18c3-4 7-7 10-9" stroke="${c}" stroke-width="2.2" stroke-linecap="round"/>
+          </svg>`;
+      }
+      if (kind === "wrench") {
+        return `
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M14 7a5 5 0 0 0-6 6L3 18l3 3 5-5a5 5 0 0 0 6-6l-3 3-3-3 3-3Z" stroke="${c}" stroke-width="2.2" stroke-linejoin="round"/>
+          </svg>`;
+      }
+      // book
+      return `
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M6 4h10a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2V6a2 2 0 0 1 2-2Z" stroke="${c}" stroke-width="2.2" stroke-linejoin="round"/>
+          <path d="M6 4v14" stroke="${c}" stroke-width="2.2" stroke-linecap="round"/>
+        </svg>`;
     }
 
+    function isSmallScreen(){
+      return window.matchMedia("(max-width: 920px)").matches;
+    }
+
+    function closeMobileDrawer(){
+      ui.openMobile = false;
+      app.classList.remove("sb-open");
+    }
+
+    function openMobileDrawer(){
+      ui.openMobile = true;
+      app.classList.add("sb-open");
+    }
+
+    // ===== Filtering =====
     function match(m){
       if (state.subject !== "すべて" && m.subject !== state.subject) return false;
       if (state.unit !== "すべて" && m.unit !== state.unit) return false;
@@ -501,6 +909,7 @@
       return hay.includes(q);
     }
 
+    // ===== Render: Cards =====
     function card(m){
       const c = document.createElement("div");
       c.className = "card";
@@ -594,19 +1003,167 @@
       return c;
     }
 
+    // ===== Render: Chips =====
+    function renderChips(){
+      subjectChips.innerHTML = "";
+      listSubjects().forEach(s=>{
+        subjectChips.appendChild(makeChip(s, state.subject===s, ()=>{
+          state.subject = s;
+          state.unit = "すべて";
+          render();
+          if (isSmallScreen()) closeMobileDrawer();
+        }));
+      });
+
+      unitChips.innerHTML = "";
+      listUnits().forEach(u=>{
+        unitChips.appendChild(makeChip(u, state.unit===u, ()=>{
+          state.unit = u;
+          render();
+          if (isSmallScreen()) closeMobileDrawer();
+        }));
+      });
+    }
+
+    // ===== Render: Sidebar lists =====
+    function makeSbItem(label, subtitle, countNum, active, iconKind, onClick){
+      const item = document.createElement("div");
+      item.className = "sbItem" + (active ? " active" : "");
+      item.onclick = onClick;
+
+      const left = document.createElement("div");
+      left.className = "sbLeft";
+
+      const icon = document.createElement("div");
+      icon.className = "sbIcon";
+      icon.innerHTML = svgIcon(iconKind || "book", active ? "#ffffff" : "#141414");
+
+      const text = document.createElement("div");
+      text.className = "sbText";
+
+      const b = document.createElement("b");
+      b.textContent = label;
+
+      const s = document.createElement("span");
+      s.textContent = subtitle || "";
+
+      text.appendChild(b);
+      text.appendChild(s);
+
+      left.appendChild(icon);
+      left.appendChild(text);
+
+      const cnt = document.createElement("div");
+      cnt.className = "sbCount";
+      cnt.textContent = String(countNum ?? "");
+
+      item.appendChild(left);
+      item.appendChild(cnt);
+      return item;
+    }
+
+    function renderSidebar(){
+      // subjects
+      sbSubjects.innerHTML = "";
+      const subjList = listSubjects();
+      sbMiniAll.textContent = `全${MATERIALS.length}件`;
+
+      subjList.forEach(s=>{
+        const subtitle = (s === "すべて") ? "全部表示" : "この教科だけ";
+        const iconKind = (s === "すべて") ? "book" : iconForSubject(s);
+        const item = makeSbItem(
+          s,
+          subtitle,
+          countBySubject(s),
+          state.subject === s,
+          iconKind,
+          ()=>{
+            state.subject = s;
+            state.unit = "すべて";
+            render();
+            if (isSmallScreen()) closeMobileDrawer();
+          }
+        );
+        sbSubjects.appendChild(item);
+      });
+
+      // units
+      sbUnits.innerHTML = "";
+      const unitList = listUnits();
+      sbMiniUnit.textContent = (state.subject === "すべて") ? "教科を選ぶと絞れます" : `「${state.subject}」内`;
+
+      unitList.forEach(u=>{
+        const subtitle = (u === "すべて") ? "全部" : "このカテゴリだけ";
+        const item = makeSbItem(
+          u,
+          subtitle,
+          countByUnit(u),
+          state.unit === u,
+          "leaf",
+          ()=>{
+            state.unit = u;
+            render();
+            if (isSmallScreen()) closeMobileDrawer();
+          }
+        );
+        sbUnits.appendChild(item);
+      });
+    }
+
+    // ===== Render all =====
     function render(){
       renderChips();
+      renderSidebar();
+
       const list = MATERIALS.filter(match);
       count.textContent = `表示：${list.length}件 / 全${MATERIALS.length}件`;
+
       grid.innerHTML = "";
       list.forEach(m => grid.appendChild(card(m)));
     }
 
+    // ===== Sidebar toggle logic =====
+    function applySidebarMode(){
+      if (!isSmallScreen()){
+        // desktop/tablet: collapse mode
+        if (ui.collapsed) app.classList.add("sb-collapsed");
+        else app.classList.remove("sb-collapsed");
+
+        // ensure mobile class removed
+        app.classList.remove("sb-open");
+        ui.openMobile = false;
+
+        sbToggleText.textContent = ui.collapsed ? "展開" : "収納";
+      } else {
+        // mobile: drawer mode
+        app.classList.remove("sb-collapsed");
+        sbToggleText.textContent = "メニュー";
+      }
+    }
+
+    sbToggle.addEventListener("click", ()=>{
+      if (isSmallScreen()){
+        // mobile drawer open/close
+        if (ui.openMobile) closeMobileDrawer();
+        else openMobileDrawer();
+      } else {
+        ui.collapsed = !ui.collapsed;
+        localStorage.setItem("sbCollapsed", ui.collapsed ? "1" : "0");
+        applySidebarMode();
+      }
+    });
+
+    overlay.addEventListener("click", closeMobileDrawer);
+
+    // ===== Search =====
     qEl.addEventListener("input", ()=>{
       state.q = qEl.value;
       render();
     });
 
+    // ===== Init =====
+    window.addEventListener("resize", applySidebarMode);
+    applySidebarMode();
     render();
   </script>
 </body>
