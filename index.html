@@ -24,6 +24,11 @@
       --gap:16px;
       --btnH:44px;
       --chipH:34px;
+
+      /* ✅ 追加：左上のメニューボタン分の逃げ */
+      --openBtnSize:48px;
+      --openBtnGap:14px; /* ボタンと文字の間隔 */
+      --openBtnReserve: calc(var(--openBtnSize) + var(--openBtnGap));
     }
 
     *{box-sizing:border-box}
@@ -244,13 +249,14 @@
       padding: 18px;
     }
 
-    /* top-left floating open button */
+    /* ✅ top-left floating open button（被らないようにサイズ変数を使う） */
     .openSB{
       position:fixed;
-      top:12px;
-      left:12px;
+      top: calc(12px + env(safe-area-inset-top));
+      left: calc(12px + env(safe-area-inset-left));
       z-index:30;
-      width:48px; height:48px;
+      width:var(--openBtnSize);
+      height:var(--openBtnSize);
       border-radius: 16px;
       border: var(--bw) solid var(--ink);
       background:
@@ -259,6 +265,7 @@
       cursor:pointer;
       display:grid; place-items:center;
       user-select:none;
+      -webkit-tap-highlight-color: transparent;
     }
     .openSB:active{transform: translateY(1px)}
     .openSB .bars{
@@ -274,6 +281,10 @@
       border: var(--bw) solid var(--ink);
       border-radius: var(--r28);
       padding: 18px 18px 16px;
+
+      /* ✅ ここが本命：左上ボタン分の余白を確保して重なり回避 */
+      padding-left: calc(18px + var(--openBtnReserve));
+
       background:
         linear-gradient(180deg, rgba(0,0,0,.08), rgba(0,0,0,0)),
         repeating-linear-gradient(90deg, rgba(255,255,255,.08) 0 4px, transparent 4px 12px),
@@ -457,9 +468,6 @@
       background: rgba(255,255,255,.85);
       font-weight:900;
       color: rgba(0,0,0,.80);
-    }
-    .metaActions{
-      display:flex; gap:10px; flex-wrap:wrap;
     }
 
     /* Cards */
@@ -732,6 +740,14 @@
       background: rgba(255,255,255,.75);
     }
 
+    /* ✅ スマホ幅では“左余白を増やす”より“上に逃がす”方が安全 */
+    @media (max-width: 720px){
+      .header{
+        padding-left: 18px;
+        padding-top: calc(18px + var(--openBtnReserve));
+      }
+    }
+
     /* Reduced motion */
     @media (prefers-reduced-motion: reduce){
       .sidebar, .overlay{transition:none}
@@ -740,9 +756,10 @@
   </style>
 </head>
 <body>
-  <div class="openSB" id="openSB" title="メニュー">
-    <div class="bars"><i></i><i></i><i></i></div>
-  </div>
+  <!-- ✅ div→button（アクセシビリティ） -->
+  <button class="openSB" id="openSB" title="メニュー" aria-label="メニューを開く">
+    <div class="bars" aria-hidden="true"><i></i><i></i><i></i></div>
+  </button>
 
   <div class="overlay" id="overlay"></div>
 
@@ -918,7 +935,7 @@
   </div>
 
   <!-- Data -->
-  <script src="./materials.js?v=1"></script>
+  <script src="./materials.js?v=2"></script>
 
   <script>
     // ===== Helpers =====
@@ -972,7 +989,6 @@
 
     // ===== Load Data =====
     function loadBase(){
-      // materials.js defines window.MATERIALS (array)
       const base = Array.isArray(window.MATERIALS) ? window.MATERIALS : [];
       return base.map(m => ({
         id: m.id || nowId("b"),
@@ -981,7 +997,7 @@
         unit: m.unit || "未分類",
         desc: m.desc || "",
         tags: Array.isArray(m.tags) ? m.tags : [],
-        kind: m.kind || "url", // url | page | file | inline_html
+        kind: m.kind || "url",
         url: m.url || "",
         thumb: m.thumb || ""
       }));
@@ -1014,10 +1030,8 @@
 
       const merged = [...state.data.base, ...state.data.custom];
 
-      // remove hidden
       const visible = merged.filter(m => !state.data.hidden.has(m.id));
 
-      // gentle sort
       visible.sort((a,b)=>{
         const A = (a.subject||"") + "｜" + (a.unit||"") + "｜" + (a.title||"");
         const B = (b.subject||"") + "｜" + (b.unit||"") + "｜" + (b.title||"");
@@ -1036,7 +1050,6 @@
       state.sidebarOpen = open;
       $("sidebar").classList.toggle("on", open);
       $("overlay").classList.toggle("on", open);
-      // open button always visible, but overlay click closes
     }
 
     // ===== Rendering =====
@@ -1065,7 +1078,6 @@
 
       const all = state.data.allVisible;
 
-      // include presets + actual
       const subjects = new Set(SUBJECT_PRESETS);
       all.forEach(m => subjects.add(m.subject || "未分類"));
 
@@ -1089,6 +1101,7 @@
           state.page="list";
           $("drawer").classList.remove("on");
           renderAll();
+          setSidebar(false);
         };
         return it;
       };
@@ -1113,7 +1126,6 @@
 
       if(state.subject === "すべて"){
         $("sbUnitHint").textContent = "教科を選ぶ";
-        // Show a compact note row
         const note = document.createElement("div");
         note.style.padding = "10px 12px";
         note.style.color = "rgba(0,0,0,.65)";
@@ -1145,12 +1157,12 @@
           state.page="list";
           $("drawer").classList.remove("on");
           renderAll();
+          setSidebar(false);
         };
         return it;
       };
 
-      const total = filtered.length;
-      el.appendChild(make("すべて", total, state.unit==="すべて"));
+      el.appendChild(make("すべて", filtered.length, state.unit==="すべて"));
       for(const u of units){
         const c = unitCounts.get(u) || 0;
         if(c<=0) continue;
@@ -1164,7 +1176,6 @@
       const q = (state.q || "").trim().toLowerCase();
       let arr = state.data.allVisible.slice();
 
-      // subject / unit
       if(state.subject !== "すべて"){
         arr = arr.filter(m => (m.subject||"未分類") === state.subject);
       }
@@ -1172,18 +1183,14 @@
         arr = arr.filter(m => (m.unit||"未分類") === state.unit);
       }
 
-      // top chip (type-ish): we treat as tags / unit-like
       if(state.chip !== "すべて"){
         if(state.chip === "単元"){
-          // show everything except ICTツール? (soft)
           arr = arr.filter(m => (m.subject||"") !== "ICTツール");
         } else {
-          // tag match
           arr = arr.filter(m => (m.tags||[]).includes(state.chip) || (m.unit||"") === state.chip || (m.subject||"") === state.chip);
         }
       }
 
-      // query
       if(q){
         arr = arr.filter(m=>{
           const s = [
@@ -1203,6 +1210,112 @@
       return "▶︎";
     }
 
+    function resolveUrl(m){
+      if(m.kind === "inline_html") return "（HTML保存）";
+      return normalizeUrl(m.url || "");
+    }
+
+    function copyText(t){
+      if(!t) return;
+      navigator.clipboard?.writeText(t).then(()=>{
+        toast("コピーしました");
+      }).catch(()=>{
+        const ta = document.createElement("textarea");
+        ta.value = t; document.body.appendChild(ta);
+        ta.select(); document.execCommand("copy");
+        ta.remove();
+        toast("コピーしました");
+      });
+    }
+
+    let toastTimer = null;
+    function toast(msg){
+      let el = document.getElementById("toast");
+      if(!el){
+        el = document.createElement("div");
+        el.id = "toast";
+        el.style.position="fixed";
+        el.style.bottom="14px";
+        el.style.left="50%";
+        el.style.transform="translateX(-50%)";
+        el.style.padding="10px 14px";
+        el.style.border="2px solid #111";
+        el.style.borderRadius="999px";
+        el.style.background="rgba(255,255,255,.94)";
+        el.style.fontWeight="950";
+        el.style.boxShadow="0 12px 28px rgba(0,0,0,.18)";
+        el.style.zIndex="200";
+        document.body.appendChild(el);
+      }
+      el.textContent = msg;
+      el.style.display="block";
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(()=>{ el.style.display="none"; }, 1100);
+    }
+
+    // ===== Player =====
+    function showPlayer(m, opt){
+      $("playerTitle").textContent = (m.title || "教材");
+      $("player").classList.add("on");
+      const frame = $("playerFrame");
+      frame.src = "about:blank";
+      frame.removeAttribute("srcdoc");
+      if(opt && opt.srcdoc){
+        frame.setAttribute("srcdoc", opt.srcdoc);
+      } else if(opt && opt.src){
+        frame.src = opt.src;
+      }
+      $("player").setAttribute("aria-hidden", "false");
+      state.player.open = true;
+      state.player.current = m;
+    }
+
+    function openMaterial(m){
+      if(m.kind === "file"){
+        window.open(m.url, "_blank", "noopener");
+        return;
+      }
+      if(m.kind === "inline_html"){
+        showPlayer(m, {srcdoc: m.inlineHtml || ""});
+        return;
+      }
+      const url = normalizeUrl(m.url || "");
+      if(!url){ toast("URLが空です"); return; }
+
+      if(isLocalUrl(url)){
+        const bust = (url.includes("?") ? "&" : "?") + "v=" + Date.now();
+        showPlayer(m, {src: url + bust});
+      } else {
+        window.open(url, "_blank", "noopener");
+      }
+    }
+
+    function closePlayer(){
+      $("player").classList.remove("on");
+      $("playerFrame").src = "about:blank";
+      $("player").setAttribute("aria-hidden", "true");
+      state.player.open = false;
+      state.player.current = null;
+    }
+
+    // ===== Delete / Hide =====
+    function deleteMaterial(m, isCustom){
+      if(isCustom){
+        const ok = confirm("この端末の保存データから削除します。OK？");
+        if(!ok) return;
+        const next = state.data.custom.filter(x => x.id !== m.id);
+        saveCustom(next);
+      } else {
+        const ok = confirm("この教材を“この端末で非表示”にします。OK？\n（GitHubのファイル自体は消えません）");
+        if(!ok) return;
+        state.data.hidden.add(m.id);
+        saveHidden(state.data.hidden);
+      }
+      refreshData();
+      renderAll();
+    }
+
+    // ===== Cards =====
     function renderCards(list){
       const grid = $("grid");
       grid.innerHTML = "";
@@ -1267,142 +1380,14 @@
       }
     }
 
-    function resolveUrl(m){
-      if(m.kind === "inline_html") return "（HTML保存）";
-      return normalizeUrl(m.url || "");
-    }
-
-    function copyText(t){
-      if(!t) return;
-      navigator.clipboard?.writeText(t).then(()=>{
-        toast("コピーしました");
-      }).catch(()=>{
-        // fallback
-        const ta = document.createElement("textarea");
-        ta.value = t; document.body.appendChild(ta);
-        ta.select(); document.execCommand("copy");
-        ta.remove();
-        toast("コピーしました");
-      });
-    }
-
-    let toastTimer = null;
-    function toast(msg){
-      let el = document.getElementById("toast");
-      if(!el){
-        el = document.createElement("div");
-        el.id = "toast";
-        el.style.position="fixed";
-        el.style.bottom="14px";
-        el.style.left="50%";
-        el.style.transform="translateX(-50%)";
-        el.style.padding="10px 14px";
-        el.style.border="2px solid #111";
-        el.style.borderRadius="999px";
-        el.style.background="rgba(255,255,255,.94)";
-        el.style.fontWeight="950";
-        el.style.boxShadow="0 12px 28px rgba(0,0,0,.18)";
-        el.style.zIndex="200";
-        document.body.appendChild(el);
-      }
-      el.textContent = msg;
-      el.style.display="block";
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(()=>{ el.style.display="none"; }, 1100);
-    }
-
-    // ===== Player =====
-    function openMaterial(m){
-      // If external URL and not embeddable, open in new tab.
-      if(m.kind === "file"){
-        // direct download/open
-        window.open(m.url, "_blank", "noopener");
-        return;
-      }
-
-      if(m.kind === "inline_html"){
-        showPlayer(m, {srcdoc: m.inlineHtml || ""});
-        return;
-      }
-
-      const url = normalizeUrl(m.url || "");
-      if(!url){
-        toast("URLが空です");
-        return;
-      }
-
-      if(isLocalUrl(url)){
-        // same site -> open inside player iframe
-        // cache busting
-        const bust = (url.includes("?") ? "&" : "?") + "v=" + Date.now();
-        showPlayer(m, {src: url + bust});
-      } else {
-        // external
-        window.open(url, "_blank", "noopener");
-      }
-    }
-
-    function showPlayer(m, opt){
-      state.player.open = true;
-      state.player.current = m;
-
-      $("playerTitle").textContent = (m.title || "教材");
-      $("player").classList.add("on");
-
-      const frame = $("playerFrame");
-      frame.src = "about:blank";
-      frame.removeAttribute("srcdoc");
-
-      if(opt && opt.srcdoc){
-        frame.setAttribute("srcdoc", opt.srcdoc);
-        state.player.lastUrl = "（HTML保存）";
-      } else if(opt && opt.src){
-        frame.src = opt.src;
-        state.player.lastUrl = normalizeUrl(m.url || "");
-      } else {
-        frame.src = "about:blank";
-        state.player.lastUrl = normalizeUrl(m.url || "");
-      }
-
-      $("player").setAttribute("aria-hidden", "false");
-    }
-
-    function closePlayer(){
-      state.player.open = false;
-      state.player.current = null;
-      $("player").classList.remove("on");
-      $("playerFrame").src = "about:blank";
-      $("player").setAttribute("aria-hidden", "true");
-    }
-
-    // ===== Delete / Hide =====
-    function deleteMaterial(m, isCustom){
-      if(isCustom){
-        const ok = confirm("この端末の保存データから削除します。OK？");
-        if(!ok) return;
-        const next = state.data.custom.filter(x => x.id !== m.id);
-        saveCustom(next);
-      } else {
-        const ok = confirm("この教材を“この端末で非表示”にします。OK？\n（GitHubのファイル自体は消えません）");
-        if(!ok) return;
-        state.data.hidden.add(m.id);
-        saveHidden(state.data.hidden);
-      }
-      refreshData();
-      renderAll();
-    }
-
     // ===== Create =====
     function setPage(page){
       state.page = page;
       $("navList").classList.toggle("active", page==="list");
       $("navCreate").classList.toggle("active", page==="create");
-
-      const drawer = $("drawer");
-      drawer.classList.toggle("on", page==="create");
+      $("drawer").classList.toggle("on", page==="create");
       if(page==="create"){
-        // scroll to drawer
-        drawer.scrollIntoView({behavior:"smooth", block:"start"});
+        $("drawer").scrollIntoView({behavior:"smooth", block:"start"});
       }
     }
 
@@ -1434,10 +1419,7 @@
       const tags = $("fTags").value.split(",").map(s=>s.trim()).filter(Boolean);
       const type = $("fType").value;
 
-      if(!title){
-        toast("タイトルが必要です");
-        return;
-      }
+      if(!title){ toast("タイトルが必要です"); return; }
 
       let item = {
         id: nowId("m"),
@@ -1450,26 +1432,18 @@
 
       if(type === "url"){
         const url = normalizeUrl($("fUrl").value);
-        if(!url){
-          toast("URLが必要です");
-          return;
-        }
+        if(!url){ toast("URLが必要です"); return; }
         item.kind = "url";
         item.url = url;
       } else {
         const html = $("fHtml").value;
-        if(!html.trim()){
-          toast("HTMLコードが空です");
-          return;
-        }
+        if(!html.trim()){ toast("HTMLコードが空です"); return; }
         item.kind = "inline_html";
         item.inlineHtml = html;
       }
 
-      const next = [...state.data.custom, item];
-      saveCustom(next);
+      saveCustom([...state.data.custom, item]);
 
-      // clear
       $("fTitle").value = "";
       $("fUnit").value = "";
       $("fTags").value = "";
@@ -1486,11 +1460,7 @@
     }
 
     function exportCustom(){
-      const payload = {
-        version: 1,
-        exportedAt: new Date().toISOString(),
-        custom: state.data.custom
-      };
+      const payload = { version: 1, exportedAt: new Date().toISOString(), custom: state.data.custom };
       const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
@@ -1503,20 +1473,12 @@
       const reader = new FileReader();
       reader.onload = () => {
         const obj = safeJsonParse(reader.result, null);
-        if(!obj || !Array.isArray(obj.custom)){
-          toast("JSON形式が違います");
-          return;
-        }
+        if(!obj || !Array.isArray(obj.custom)){ toast("JSON形式が違います"); return; }
         const merged = [...state.data.custom, ...obj.custom];
-        // de-dup by id
         const map = new Map();
-        for(const m of merged){
-          map.set(m.id || nowId("m"), m);
-        }
+        for(const m of merged){ map.set(m.id || nowId("m"), m); }
         saveCustom(Array.from(map.values()));
-        refreshData();
-        renderAll();
-        toast("インポートしました");
+        refreshData(); renderAll(); toast("インポートしました");
       };
       reader.readAsText(file);
     }
@@ -1525,9 +1487,7 @@
       const ok = confirm("この端末の保存データ（作成分）を全部削除します。OK？");
       if(!ok) return;
       saveCustom([]);
-      refreshData();
-      renderAll();
-      toast("削除しました");
+      refreshData(); renderAll(); toast("削除しました");
     }
 
     // ===== Render All =====
@@ -1535,7 +1495,6 @@
       renderTopChips();
       renderSubjectList();
       renderUnitList();
-
       const list = applyFilters();
       $("metaBadge").textContent = `表示：${list.length}件`;
       renderCards(list);
@@ -1584,20 +1543,14 @@
       $("playerNewTab").onclick = ()=>{
         const m = state.player.current;
         if(!m) return;
-        if(m.kind === "inline_html"){
-          toast("HTML保存は新規タブにできません");
-          return;
-        }
+        if(m.kind === "inline_html"){ toast("HTML保存は新規タブにできません"); return; }
         const url = normalizeUrl(m.url || "");
         if(url) window.open(url, "_blank", "noopener");
       };
       $("playerCopy").onclick = ()=>{
         const m = state.player.current;
         if(!m) return;
-        if(m.kind === "inline_html"){
-          toast("HTML保存はURLがありません");
-          return;
-        }
+        if(m.kind === "inline_html"){ toast("HTML保存はURLがありません"); return; }
         copyText(normalizeUrl(m.url||""));
       };
       window.addEventListener("keydown", (e)=>{
