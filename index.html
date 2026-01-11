@@ -1,1702 +1,1618 @@
 <!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#111111" />
   <title>えいき教材ポータル</title>
   <style>
     :root{
-      /* Layout */
-      --sbW: 320px;
-      --sbCollapsedW: 72px;
-      --radius: 18px;
-      --radiusSm: 14px;
-      --shadow: 0 10px 30px rgba(0,0,0,.12);
-
-      /* Colors */
-      --bg: #f6f3ee;
-      --paper: rgba(255,255,255,.78);
-      --ink: #111;
-      --inkSoft: rgba(17,17,17,.70);
+      --ink:#111;
+      --muted:#666;
+      --paper:#f6f3ee;
+      --paper2:#fbfaf7;
+      --wood1:#a77a46;
+      --wood2:#8b5f33;
       --line: rgba(17,17,17,.18);
-      --line2: rgba(17,17,17,.26);
-      --chip: rgba(17,17,17,.08);
-      --chipOn: #111;
-      --chipOnText: #fff;
+      --shadow: 0 10px 30px rgba(0,0,0,.10);
+      --r16:16px;
+      --r22:22px;
+      --r28:28px;
+      --bw:2px;
 
-      /* Wood */
-      --wood1: #caa26f;
-      --wood2: #b98952;
-      --wood3: rgba(17,17,17,.14);
-
-      /* Accent */
-      --accent: #111;
-      --ok: #1d7a3a;
+      --sbw:320px;
+      --gap:16px;
+      --btnH:44px;
+      --chipH:34px;
     }
 
-    *{ box-sizing: border-box; }
-    html,body{ height:100%; }
+    *{box-sizing:border-box}
+    html,body{height:100%}
     body{
       margin:0;
-      font-family: system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      color: var(--ink);
+      color:var(--ink);
       background:
-        radial-gradient(1200px 900px at 20% 35%, rgba(0,0,0,.035), transparent 60%),
-        radial-gradient(1000px 800px at 80% 50%, rgba(0,0,0,.03), transparent 60%),
-        repeating-linear-gradient(45deg, rgba(0,0,0,.012), rgba(0,0,0,.012) 6px, transparent 6px, transparent 12px),
-        var(--bg);
-      overflow:hidden;
+        radial-gradient(1200px 700px at 20% 10%, rgba(167,122,70,.18), transparent 55%),
+        radial-gradient(1000px 600px at 90% 30%, rgba(17,17,17,.08), transparent 55%),
+        linear-gradient(0deg, var(--paper), var(--paper2));
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
     }
 
-    /* App shell */
+    /* subtle paper noise */
+    body:before{
+      content:"";
+      position:fixed; inset:0;
+      pointer-events:none;
+      background-image:
+        repeating-linear-gradient(45deg, rgba(0,0,0,.02) 0 2px, transparent 2px 10px);
+      mix-blend-mode:multiply;
+      opacity:.35;
+    }
+
+    a{color:inherit}
+    button, input, textarea, select{
+      font:inherit;
+      color:inherit;
+    }
+
+    /* Layout */
     .app{
-      height: 100%;
+      height:100%;
       display:flex;
       align-items:stretch;
     }
 
-    /* Sidebar */
+    /* Sidebar (overlay) */
+    .overlay{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.38);
+      opacity:0;
+      pointer-events:none;
+      transition: opacity .18s ease;
+      z-index:40;
+    }
+    .overlay.on{opacity:1; pointer-events:auto;}
+
     .sidebar{
-      width: var(--sbW);
-      background: rgba(255,255,255,.78);
-      border-right: 3px solid var(--ink);
-      box-shadow: 0 0 0 1px rgba(0,0,0,.03) inset;
-      padding: 14px 12px;
+      position:fixed;
+      top:0; left:0; bottom:0;
+      width:var(--sbw);
+      transform: translateX(-102%);
+      transition: transform .22s ease;
+      z-index:50;
+
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.94), rgba(255,255,255,.88)),
+        radial-gradient(900px 500px at 30% 0%, rgba(167,122,70,.14), transparent 60%);
+      border-right: var(--bw) solid var(--ink);
+      box-shadow: var(--shadow);
+      padding: 14px 14px 18px;
       display:flex;
       flex-direction:column;
       gap: 12px;
-      overflow:hidden;
     }
+    .sidebar.on{transform: translateX(0);}
 
     .sbTop{
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:10px;
+      padding: 6px 2px 2px;
     }
-
     .brand{
       display:flex; align-items:center; gap:10px;
-      min-width: 0;
-    }
-    .brandMark{
-      width:42px; height:42px; border-radius: 14px;
-      background:
-        radial-gradient(12px 12px at 25% 25%, rgba(255,255,255,.55), transparent 60%),
-        linear-gradient(180deg, rgba(0,0,0,.06), transparent 40%),
-        repeating-linear-gradient(90deg, rgba(0,0,0,.08), rgba(0,0,0,.08) 3px, transparent 3px, transparent 10px),
-        linear-gradient(180deg, var(--wood1), var(--wood2));
-      border: 3px solid var(--ink);
-      display:grid; place-items:center;
-    }
-    .brandMark svg{ width:22px; height:22px; }
-    .brandText{
-      display:flex; flex-direction:column; line-height:1.1;
       min-width:0;
     }
-    .brandText b{
+    .brandIcon{
+      width:38px; height:38px;
+      border: var(--bw) solid var(--ink);
+      border-radius: 12px;
+      background:
+        linear-gradient(180deg, rgba(167,122,70,.20), rgba(167,122,70,.05));
+      display:grid; place-items:center;
+      flex:0 0 auto;
+    }
+    .brandText{
+      min-width:0;
+      line-height:1.05;
+    }
+    .brandText .t{
+      font-weight:900;
       font-size:16px;
+      letter-spacing:.02em;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
     }
-    .brandText span{
+    .brandText .s{
+      margin-top:4px;
       font-size:12px;
-      color: var(--inkSoft);
+      color:var(--muted);
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
     }
-
-    .sbToggles{
-      display:flex; align-items:center; gap:8px;
-      flex-shrink:0;
-    }
-    .btn{
-      border: 3px solid var(--ink);
-      background: rgba(255,255,255,.82);
+    .sbClose{
+      height:40px;
+      padding:0 12px;
       border-radius: 999px;
-      padding: 10px 12px;
-      font-weight: 800;
+      border: var(--bw) solid var(--ink);
+      background:#fff;
+      display:flex;
+      align-items:center;
+      gap:10px;
       cursor:pointer;
       user-select:none;
-      box-shadow: 0 2px 0 rgba(0,0,0,.10);
-      transition: transform .06s ease, background .2s ease;
+      box-shadow: 0 6px 16px rgba(0,0,0,.08);
     }
-    .btn:active{ transform: translateY(1px); }
-    .btn.small{ padding: 8px 10px; font-weight: 800; font-size: 12px; }
-    .btn.black{
-      background: var(--ink);
-      color:#fff;
+    .sbClose:active{transform: translateY(1px)}
+    .sbClose .bars{
+      width:14px; height:14px;
+      display:grid; gap:3px;
     }
-    .btn.ghost{
-      background: rgba(255,255,255,.0);
+    .sbClose .bars i{
+      height:2px; background:var(--ink); display:block; border-radius:2px;
     }
-
-    .sbScroll{
-      overflow:auto;
-      padding-right: 6px;
-      margin-right: -6px;
-    }
-    .sbScroll::-webkit-scrollbar{ width: 10px; }
-    .sbScroll::-webkit-scrollbar-thumb{ background: rgba(0,0,0,.18); border-radius:999px; border:2px solid rgba(255,255,255,.7); }
 
     .sbSection{
-      border-top: 2px solid rgba(17,17,17,.12);
-      padding-top: 12px;
-      margin-top: 6px;
+      border: var(--bw) solid var(--ink);
+      border-radius: var(--r22);
+      background: rgba(255,255,255,.92);
+      overflow:hidden;
     }
-    .sbSectionTitle{
-      display:flex; align-items:center; justify-content:space-between;
+    .sbSectionHeader{
+      padding: 10px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
       gap:10px;
-      margin-bottom: 10px;
-      color: var(--inkSoft);
-      font-weight: 900;
-      font-size: 12px;
-      letter-spacing: .02em;
+      border-bottom: 1px solid var(--line);
+      background: rgba(0,0,0,.03);
+      font-weight:800;
     }
+    .sbSectionHeader small{color:var(--muted); font-weight:700}
 
     .sbList{
+      padding: 10px;
       display:flex;
       flex-direction:column;
-      gap: 10px;
+      gap:10px;
     }
 
     .sbItem{
-      width:100%;
-      border: 2px solid rgba(17,17,17,.20);
-      border-radius: var(--radiusSm);
-      background: rgba(255,255,255,.70);
-      padding: 10px 10px;
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:10px;
+      gap:12px;
+      padding: 12px 12px;
+      border-radius: 16px;
+      border: var(--bw) solid rgba(17,17,17,.22);
+      background:#fff;
       cursor:pointer;
       user-select:none;
-      transition: transform .06s ease, background .2s ease, border-color .2s ease;
     }
-    .sbItem:hover{ background: rgba(255,255,255,.88); }
-    .sbItem:active{ transform: translateY(1px); }
-
-    .sbItem.on{
-      border-color: rgba(17,17,17,.65);
-      background: rgba(17,17,17,.92);
+    .sbItem.active{
+      background: #111;
       color:#fff;
+      border-color:#111;
     }
-
-    .sbLeft{
-      display:flex;
-      align-items:center;
-      gap:10px;
+    .sbItem .l{
+      display:flex; align-items:center; gap:10px;
       min-width:0;
     }
-
-    .sbIcon{
-      width:46px;
-      height:46px;
-      border-radius: 16px;
-      border: 3px solid var(--ink);
-      background: rgba(255,255,255,.85);
-      display:grid;
-      place-items:center;
-      flex-shrink:0;
-      box-shadow: 0 2px 0 rgba(0,0,0,.10);
+    .sbItem .icon{
+      width:34px; height:34px;
+      border-radius: 12px;
+      border: var(--bw) solid currentColor;
+      display:grid; place-items:center;
+      opacity:.95;
+      flex:0 0 auto;
     }
-    .sbItem.on .sbIcon{
-      border-color:#fff;
-      background: rgba(255,255,255,.12);
-      box-shadow:none;
-    }
-    .sbIcon svg{ width:22px; height:22px; }
-
-    .sbText{
+    .sbItem .name{
+      min-width:0;
       display:flex;
       flex-direction:column;
       gap:2px;
-      min-width:0;
     }
-    .sbText b{
-      font-size: 14px;
+    .sbItem .name b{
+      font-size:14px;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
     }
-    .sbText span{
-      font-size: 12px;
-      color: var(--inkSoft);
+    .sbItem .name span{
+      font-size:12px; opacity:.75;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
     }
-    .sbItem.on .sbText span{ color: rgba(255,255,255,.75); }
-
-    .sbCount{
+    .sbItem .count{
       width:34px; height:34px;
       border-radius: 999px;
+      border: var(--bw) solid currentColor;
       display:grid; place-items:center;
-      border: 2px solid rgba(17,17,17,.30);
-      font-weight: 900;
-      background: rgba(255,255,255,.70);
-      flex-shrink:0;
+      font-weight:900;
+      flex:0 0 auto;
+      opacity:.9;
     }
-    .sbItem.on .sbCount{
-      border-color: rgba(255,255,255,.70);
-      background: rgba(255,255,255,.12);
-      color:#fff;
-    }
-
-    .hintBox{
-      margin-top: 10px;
-      border: 2px dashed rgba(17,17,17,.20);
-      border-radius: var(--radiusSm);
-      padding: 10px;
-      background: rgba(255,255,255,.55);
-      color: var(--inkSoft);
-      font-weight: 800;
-      font-size: 12px;
-      line-height: 1.4;
-    }
-
-    /* Collapsed (Safari風の左アイコン列) */
-    .app.sb-collapsed .sidebar{ width: var(--sbCollapsedW); padding: 12px 10px; }
-    .app.sb-collapsed .brandText{ display:none; }
-    .app.sb-collapsed .btn.small span{ display:none; }
-    .app.sb-collapsed .sbScroll{ padding-right:0; margin-right:0; }
-    .app.sb-collapsed .sbSection{ display:none; }
-    .app.sb-collapsed .sbSection[data-keep="pages"]{ display:block; border-top:none; padding-top:0; margin-top:0; }
-    .app.sb-collapsed .sbSectionTitle{ display:none; }
-    .app.sb-collapsed .sbList{ gap: 12px; align-items:center; }
-    .app.sb-collapsed .sbItem{
-      width: 52px;
-      padding: 0;
-      border: none;
-      background: transparent;
-      box-shadow:none;
-      justify-content:center;
-    }
-    .app.sb-collapsed .sbLeft{ gap:0; }
-    .app.sb-collapsed .sbText, .app.sb-collapsed .sbCount{ display:none; }
-    .app.sb-collapsed .sbIcon{ width:52px; height:52px; border-radius: 18px; }
-    .app.sb-collapsed .sbTop{ justify-content:center; }
-    .app.sb-collapsed .sbToggles{ position:absolute; left: 10px; top: 10px; }
-    .app.sb-collapsed .brand{ justify-content:center; }
 
     /* Main */
     .main{
-      flex:1;
-      display:flex;
-      flex-direction:column;
-      overflow:hidden;
+      flex:1 1 auto;
+      min-width:0;
+      padding: 18px;
     }
 
-    /* Header wood panel */
-    .topPanel{
-      margin: 14px;
-      border: 4px solid var(--ink);
-      border-radius: 22px;
+    /* top-left floating open button */
+    .openSB{
+      position:fixed;
+      top:12px;
+      left:12px;
+      z-index:30;
+      width:48px; height:48px;
+      border-radius: 16px;
+      border: var(--bw) solid var(--ink);
       background:
-        radial-gradient(700px 220px at 12% 20%, rgba(255,255,255,.26), transparent 60%),
-        radial-gradient(700px 260px at 70% 30%, rgba(0,0,0,.07), transparent 60%),
-        repeating-linear-gradient(90deg, rgba(0,0,0,.10), rgba(0,0,0,.10) 3px, transparent 3px, transparent 12px),
-        linear-gradient(180deg, var(--wood1), var(--wood2));
+        linear-gradient(180deg, rgba(167,122,70,.22), rgba(255,255,255,.75));
+      box-shadow: 0 10px 26px rgba(0,0,0,.12);
+      cursor:pointer;
+      display:grid; place-items:center;
+      user-select:none;
+    }
+    .openSB:active{transform: translateY(1px)}
+    .openSB .bars{
+      width:18px; height:14px;
+      display:grid; gap:4px;
+    }
+    .openSB .bars i{
+      height:2px; background:var(--ink); display:block; border-radius:2px;
+    }
+
+    /* Header (wood) */
+    .header{
+      border: var(--bw) solid var(--ink);
+      border-radius: var(--r28);
+      padding: 18px 18px 16px;
+      background:
+        linear-gradient(180deg, rgba(0,0,0,.08), rgba(0,0,0,0)),
+        repeating-linear-gradient(90deg, rgba(255,255,255,.08) 0 4px, transparent 4px 12px),
+        linear-gradient(90deg, var(--wood1), var(--wood2));
       box-shadow: var(--shadow);
-      padding: 18px 18px 14px;
       position:relative;
       overflow:hidden;
     }
-    .topPanel::after{
+    .header:after{
       content:"";
-      position:absolute;
-      right: 18px;
-      bottom: 8px;
-      width: 220px;
-      height: 90px;
-      opacity:.30;
+      position:absolute; right:-80px; top:-40px;
+      width:340px; height:200px;
+      opacity:.22;
       background:
-        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="240" height="100" viewBox="0 0 240 100"><path d="M10 75 C35 50,55 55,70 40 C88 22,110 40,125 25 C145 6,165 35,185 22 C205 10,220 25,232 20" fill="none" stroke="%23111" stroke-width="4" stroke-linecap="round"/><path d="M75 39 l-10 18 h20 z" fill="none" stroke="%23111" stroke-width="4"/><path d="M125 24 l-10 18 h20 z" fill="none" stroke="%23111" stroke-width="4"/></svg>') no-repeat center / contain;
+        radial-gradient(circle at 30% 60%, rgba(0,0,0,.25) 0 2px, transparent 3px),
+        radial-gradient(circle at 55% 55%, rgba(0,0,0,.22) 0 2px, transparent 3px),
+        radial-gradient(circle at 80% 60%, rgba(0,0,0,.20) 0 2px, transparent 3px);
+      transform: rotate(-8deg);
+      filter: blur(.2px);
       pointer-events:none;
     }
 
-    .topRow{
+    .hTop{
       display:flex;
       align-items:flex-start;
       justify-content:space-between;
-      gap: 16px;
+      gap: 14px;
+      flex-wrap:wrap;
     }
-
-    .titleBox{
-      display:flex;
-      flex-direction:column;
-      gap: 6px;
-      min-width: 0;
+    .hTitle{
+      min-width: 280px;
     }
-    .titleBox h1{
+    .hTitle h1{
       margin:0;
-      font-size: 34px;
-      letter-spacing: .02em;
-      line-height:1.05;
-      text-shadow: 0 2px 0 rgba(255,255,255,.18);
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
+      font-size: 28px;
+      font-weight: 950;
+      letter-spacing:.02em;
+      color:#111;
+      text-shadow: 0 1px 0 rgba(255,255,255,.25);
     }
-    .titleBox p{
-      margin:0;
-      font-weight: 800;
-      color: rgba(17,17,17,.75);
-      font-size: 14px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
+    .hTitle p{
+      margin: 8px 0 0;
+      color: rgba(0,0,0,.72);
+      font-size: 13px;
+      font-weight: 700;
     }
 
     .searchBox{
-      min-width: 320px;
+      min-width: 280px;
+      flex: 1 1 360px;
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
+      align-items:center;
+    }
+    .search{
+      flex: 1 1 auto;
       max-width: 520px;
-      flex: 1;
       display:flex;
       align-items:center;
-      gap: 10px;
-      border: 4px solid var(--ink);
-      background: rgba(255,255,255,.80);
+      gap:10px;
+      background: rgba(255,255,255,.92);
+      border: var(--bw) solid var(--ink);
       border-radius: 999px;
-      padding: 10px 12px;
-      box-shadow: 0 3px 0 rgba(0,0,0,.10);
+      padding: 10px 14px;
+      box-shadow: 0 8px 18px rgba(0,0,0,.10);
     }
-    .searchBox svg{ width:22px; height:22px; opacity: .85; }
-    .searchBox input{
-      width: 100%;
-      border: none;
-      outline: none;
-      background: transparent;
-      font-size: 16px;
-      font-weight: 800;
+    .search .glass{
+      width:18px; height:18px;
+      border: var(--bw) solid var(--ink);
+      border-radius: 999px;
+      position:relative;
+      flex:0 0 auto;
+    }
+    .search .glass:after{
+      content:"";
+      position:absolute;
+      width:10px; height:2px;
+      background:var(--ink);
+      right:-8px; bottom:-4px;
+      transform: rotate(45deg);
+      border-radius:2px;
+    }
+    .search input{
+      border:0; outline:none;
+      background:transparent;
+      width:100%;
+      font-size:14px;
+      font-weight:800;
     }
 
-    .chipRow{
+    .btn{
+      height: var(--btnH);
+      padding: 0 14px;
+      border-radius: 999px;
+      border: var(--bw) solid var(--ink);
+      background:#fff;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      font-weight:900;
+      box-shadow: 0 8px 18px rgba(0,0,0,.10);
+      user-select:none;
+      white-space:nowrap;
+    }
+    .btn.primary{
+      background:#111;
+      color:#fff;
+      border-color:#111;
+      box-shadow: 0 12px 22px rgba(0,0,0,.18);
+    }
+    .btn:active{transform: translateY(1px)}
+    .btn .plus{
+      width:16px; height:16px;
+      position:relative;
+    }
+    .btn .plus:before, .btn .plus:after{
+      content:"";
+      position:absolute; left:50%; top:50%;
+      width:14px; height:2px;
+      background: currentColor;
+      transform: translate(-50%,-50%);
+      border-radius:2px;
+    }
+    .btn .plus:after{transform: translate(-50%,-50%) rotate(90deg)}
+
+    /* Filters row */
+    .filters{
       margin-top: 12px;
       display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 12px;
+      gap:10px;
       flex-wrap:wrap;
-    }
-
-    .chips{
-      display:flex;
-      gap: 10px;
       align-items:center;
-      flex-wrap:wrap;
     }
-
     .chip{
-      border: 3px solid var(--ink);
-      background: rgba(255,255,255,.75);
+      height: var(--chipH);
+      padding: 0 14px;
       border-radius: 999px;
-      padding: 8px 12px;
-      font-weight: 900;
+      border: var(--bw) solid var(--ink);
+      background: rgba(255,255,255,.90);
       cursor:pointer;
-      user-select:none;
-      transition: transform .06s ease, background .2s ease;
-      font-size: 13px;
-    }
-    .chip:active{ transform: translateY(1px); }
-    .chip.on{
-      background: var(--ink);
-      color:#fff;
-    }
-
-    .rightActions{
-      display:flex;
-      gap: 10px;
+      font-weight:900;
+      display:inline-flex;
       align-items:center;
-      flex-wrap:wrap;
+      gap:10px;
+      user-select:none;
+    }
+    .chip.on{
+      background:#111;
+      color:#fff;
+      border-color:#111;
     }
 
     /* Content area */
     .content{
-      flex: 1;
-      overflow:auto;
-      padding: 0 14px 14px;
+      margin-top: 14px;
+      border: var(--bw) solid var(--ink);
+      border-radius: var(--r28);
+      background: rgba(255,255,255,.55);
+      padding: 14px;
+      box-shadow: var(--shadow);
+      min-height: calc(100vh - 220px);
     }
-    .content::-webkit-scrollbar{ width: 12px; }
-    .content::-webkit-scrollbar-thumb{ background: rgba(0,0,0,.18); border-radius:999px; border:3px solid rgba(255,255,255,.7); }
 
-    .sectionTop{
-      margin: 12px 0;
+    .metaRow{
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap: 12px;
+      gap:10px;
       flex-wrap:wrap;
+      margin-bottom: 12px;
     }
-    .badge{
-      border: 2px solid rgba(17,17,17,.25);
-      background: rgba(255,255,255,.62);
-      padding: 8px 12px;
+    .metaBadge{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding: 10px 12px;
       border-radius: 999px;
-      font-weight: 900;
-      color: var(--inkSoft);
-      font-size: 13px;
+      border: var(--bw) solid rgba(17,17,17,.20);
+      background: rgba(255,255,255,.85);
+      font-weight:900;
+      color: rgba(0,0,0,.80);
+    }
+    .metaActions{
+      display:flex; gap:10px; flex-wrap:wrap;
     }
 
+    /* Cards */
     .grid{
       display:grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 14px;
-      align-items:stretch;
     }
-
-    @media (max-width: 1100px){
-      :root{ --sbW: 300px; }
-      .grid{ grid-template-columns: 1fr; }
-      .searchBox{ min-width: 260px; }
+    @media (max-width: 980px){
+      .grid{grid-template-columns: 1fr;}
     }
 
     .card{
-      border: 3px solid var(--ink);
-      border-radius: 22px;
-      background: rgba(255,255,255,.70);
-      box-shadow: var(--shadow);
+      border: var(--bw) solid var(--ink);
+      border-radius: var(--r28);
+      background: rgba(255,255,255,.82);
       overflow:hidden;
+      box-shadow: 0 10px 26px rgba(0,0,0,.10);
       display:flex;
-      flex-direction:column;
-      min-height: 230px;
+      min-height: 180px;
     }
 
     .thumb{
-      height: 110px;
-      border-bottom: 3px solid var(--ink);
-      position:relative;
+      width: 220px;
+      min-width: 220px;
       background:
-        linear-gradient(180deg, rgba(0,0,0,.06), transparent 45%),
-        repeating-linear-gradient(45deg, rgba(0,0,0,.03), rgba(0,0,0,.03) 10px, transparent 10px, transparent 20px),
-        rgba(255,255,255,.55);
+        radial-gradient(420px 220px at 30% 20%, rgba(167,122,70,.22), transparent 60%),
+        linear-gradient(135deg, rgba(0,0,0,.06), rgba(0,0,0,0));
+      border-right: 1px solid var(--line);
+      position:relative;
       display:flex;
-      align-items:center;
-      justify-content:center;
+      align-items:stretch;
+      justify-content:stretch;
     }
     .thumb img{
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display:block;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      opacity:.96;
+      filter: saturate(.9) contrast(1.02);
     }
-    .thumbLabel{
-      position:absolute;
-      top: 10px;
-      left: 10px;
-      border: 3px solid var(--ink);
-      border-radius: 999px;
-      padding: 6px 10px;
-      background: rgba(255,255,255,.78);
-      font-weight: 900;
-      font-size: 12px;
+    .thumb .ph{
+      display:grid;
+      place-items:center;
+      width:100%;
+      height:100%;
+      padding: 14px;
+      color: rgba(0,0,0,.72);
+      font-weight:950;
+      letter-spacing:.02em;
+      font-size: 18px;
+      text-align:center;
+      line-height:1.2;
     }
-    .thumbRight{
+    .thumb .tagTop{
       position:absolute;
-      top: 10px;
-      right: 10px;
-      display:flex;
-      gap: 8px;
-      align-items:center;
+      top:10px; left:10px;
+      display:flex; gap:8px; flex-wrap:wrap;
     }
     .pill{
-      border: 2px solid rgba(17,17,17,.25);
+      display:inline-flex;
+      align-items:center;
+      padding: 0 10px;
+      height: 30px;
       border-radius: 999px;
-      padding: 6px 10px;
-      font-weight: 900;
+      border: var(--bw) solid rgba(17,17,17,.25);
+      background: rgba(255,255,255,.88);
+      font-weight:900;
       font-size: 12px;
-      background: rgba(255,255,255,.68);
-      color: var(--inkSoft);
+      white-space:nowrap;
     }
 
     .cardBody{
-      padding: 12px 14px 14px;
+      flex:1 1 auto;
+      padding: 14px 14px 12px;
       display:flex;
       flex-direction:column;
-      gap: 8px;
-      flex:1;
+      gap:10px;
+      min-width:0;
     }
     .cardTitle{
-      font-size: 18px;
-      font-weight: 1000;
-      letter-spacing: .01em;
       margin:0;
-      line-height:1.15;
+      font-size: 18px;
+      font-weight: 950;
+      letter-spacing:.01em;
     }
     .cardDesc{
       margin:0;
-      color: var(--inkSoft);
-      font-weight: 800;
+      color: rgba(0,0,0,.72);
       font-size: 13px;
-      line-height:1.35;
-      min-height: 34px;
+      font-weight: 800;
+      line-height:1.45;
     }
-    .tagRow{
+    .chipsRow{
       display:flex;
-      gap: 8px;
+      gap:8px;
       flex-wrap:wrap;
+      align-items:center;
+      margin-top: 2px;
     }
-    .tag{
-      border: 2px solid rgba(17,17,17,.20);
-      background: rgba(17,17,17,.06);
-      padding: 6px 10px;
+    .miniChip{
+      display:inline-flex;
+      align-items:center;
+      height: 30px;
+      padding: 0 12px;
       border-radius: 999px;
-      font-weight: 900;
+      border: var(--bw) solid rgba(17,17,17,.18);
+      background: rgba(0,0,0,.04);
+      font-weight:900;
       font-size: 12px;
-      color: var(--inkSoft);
+      color: rgba(0,0,0,.78);
     }
 
-    .cardActions{
+    .cardBottom{
+      margin-top:auto;
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap: 10px;
-      margin-top:auto;
-      padding-top: 8px;
+      gap:10px;
+      flex-wrap:wrap;
     }
     .idText{
-      font-weight: 900;
-      color: rgba(17,17,17,.45);
-      font-size: 12px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
+      color: rgba(0,0,0,.55);
+      font-size:12px;
+      font-weight:800;
     }
-    .actionBtns{
-      display:flex;
-      gap: 10px;
-      align-items:center;
-      flex-wrap:wrap;
+    .cardActions{
+      display:flex; gap:10px; flex-wrap:wrap;
     }
-
-    /* Create page */
-    .formWrap{
-      border: 3px solid var(--ink);
-      border-radius: 22px;
-      background: rgba(255,255,255,.72);
-      box-shadow: var(--shadow);
-      padding: 14px;
-      display:grid;
-      grid-template-columns: 1.1fr .9fr;
-      gap: 14px;
-      align-items:stretch;
-    }
-    @media (max-width: 1100px){
-      .formWrap{ grid-template-columns: 1fr; }
-    }
-    .panel{
-      border: 2px solid rgba(17,17,17,.18);
-      border-radius: 18px;
-      padding: 12px;
-      background: rgba(255,255,255,.70);
-    }
-    .panel h3{
-      margin:0 0 10px;
-      font-size: 14px;
-      letter-spacing:.02em;
-      color: var(--inkSoft);
-    }
-    .row{
-      display:grid;
-      grid-template-columns: 140px 1fr;
-      gap: 10px;
-      align-items:center;
-      margin-bottom: 10px;
-    }
-    .row label{
-      font-weight: 1000;
-      color: var(--inkSoft);
-      font-size: 13px;
-    }
-    input[type="text"], select, textarea{
-      width:100%;
-      border: 3px solid var(--ink);
-      border-radius: 14px;
-      padding: 10px 12px;
-      font-weight: 900;
-      font-size: 14px;
-      background: rgba(255,255,255,.82);
-      outline:none;
-    }
-    textarea{
-      min-height: 180px;
-      resize: vertical;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-weight: 800;
-      font-size: 12px;
-      line-height: 1.4;
-    }
-    .radioRow{
-      display:flex;
-      gap: 10px;
-      flex-wrap:wrap;
-      align-items:center;
-    }
-    .radio{
-      display:flex;
-      align-items:center;
-      gap: 8px;
-      border: 2px solid rgba(17,17,17,.18);
+    .btnSmall{
+      height: 44px;
+      padding: 0 14px;
       border-radius: 999px;
-      padding: 8px 10px;
-      background: rgba(255,255,255,.65);
+      border: var(--bw) solid var(--ink);
+      background:#fff;
       cursor:pointer;
+      font-weight:950;
       user-select:none;
-      font-weight: 1000;
-      color: var(--inkSoft);
-      font-size: 13px;
     }
-    .radio.on{
-      border-color: rgba(17,17,17,.55);
-      background: rgba(17,17,17,.92);
-      color:#fff;
+    .btnSmall.primary{
+      background:#111; color:#fff; border-color:#111;
     }
-    .radio input{ display:none; }
-
-    .previewFrame{
-      width:100%;
-      height: 420px;
-      border: 3px solid var(--ink);
-      border-radius: 18px;
+    .btnSmall.danger{
       background: #fff;
+      border-color: rgba(0,0,0,.35);
     }
-    .mono{
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    }
+    .btnSmall:active{transform: translateY(1px)}
 
-    /* Toast */
-    .toast{
-      position: fixed;
-      left: 50%;
-      transform: translateX(-50%);
-      bottom: 14px;
-      background: rgba(17,17,17,.95);
-      color: #fff;
-      border: 3px solid #fff;
-      border-radius: 999px;
-      padding: 10px 14px;
-      font-weight: 1000;
-      box-shadow: 0 10px 30px rgba(0,0,0,.25);
-      opacity: 0;
-      pointer-events:none;
-      transition: opacity .2s ease, transform .2s ease;
-      z-index: 9999;
-      max-width: min(860px, calc(100vw - 28px));
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .toast.on{
-      opacity: 1;
-      transform: translateX(-50%) translateY(-4px);
-    }
-
-    /* Error bar (debug) */
-    .errBar{
-      position: fixed;
-      left: 14px;
-      bottom: 14px;
-      right: 14px;
-      background: rgba(120,0,0,.92);
-      color:#fff;
-      border: 3px solid #fff;
-      border-radius: 18px;
-      padding: 10px 12px;
-      font-weight: 1000;
-      z-index: 9998;
+    /* Player modal */
+    .player{
+      position:fixed; inset:0;
+      z-index:80;
       display:none;
     }
-    .errBar code{ font-weight: 900; }
+    .player.on{display:block;}
+    .player .bg{
+      position:absolute; inset:0;
+      background: rgba(0,0,0,.60);
+    }
+    .player .panel{
+      position:absolute; inset: 14px;
+      border-radius: 26px;
+      border: var(--bw) solid #111;
+      background: #fff;
+      box-shadow: 0 20px 60px rgba(0,0,0,.35);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+    }
+    .playerTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding: 10px 10px;
+      background:
+        linear-gradient(180deg, rgba(167,122,70,.22), rgba(0,0,0,0)),
+        linear-gradient(90deg, #faf7f1, #fff);
+      border-bottom: 1px solid var(--line);
+    }
+    .playerTop .left{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+    .playerTop .title{
+      font-weight:950;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: min(64vw, 800px);
+    }
+    .playerTop .right{
+      display:flex; gap:10px; flex-wrap:wrap;
+    }
+    .player iframe{
+      border:0;
+      width:100%;
+      height:100%;
+      background:#fff;
+    }
+
+    /* Create drawer (in main area) */
+    .drawer{
+      display:none;
+      margin-top: 12px;
+      border: var(--bw) solid var(--ink);
+      border-radius: var(--r28);
+      background: rgba(255,255,255,.86);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .drawer.on{display:block;}
+    .drawerHead{
+      padding: 12px 14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      background: rgba(0,0,0,.03);
+      border-bottom: 1px solid var(--line);
+    }
+    .drawerHead b{font-weight:950}
+    .drawerBody{
+      padding: 14px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 980px){
+      .drawerBody{grid-template-columns: 1fr;}
+      .thumb{width: 180px; min-width:180px;}
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .field label{
+      font-weight:950;
+      font-size: 13px;
+      color: rgba(0,0,0,.82);
+    }
+    .field input, .field select, .field textarea{
+      border: var(--bw) solid rgba(17,17,17,.25);
+      border-radius: 16px;
+      padding: 10px 12px;
+      background: #fff;
+      outline:none;
+      font-weight:850;
+    }
+    .field textarea{min-height: 110px; resize:vertical; font-weight:800;}
+    .hint{
+      font-size: 12px;
+      color: rgba(0,0,0,.62);
+      font-weight:800;
+      line-height:1.35;
+    }
+    .rowSpan2{grid-column: 1 / -1;}
+
+    .drawerFoot{
+      padding: 12px 14px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+      border-top: 1px solid var(--line);
+      background: rgba(255,255,255,.75);
+    }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce){
+      .sidebar, .overlay{transition:none}
+      .openSB:active, .btn:active, .btnSmall:active, .sbClose:active{transform:none}
+    }
   </style>
 </head>
-
 <body>
-  <div id="errBar" class="errBar"></div>
-  <div id="toast" class="toast"></div>
-
-  <div id="app" class="app">
-    <!-- Sidebar -->
-    <aside class="sidebar" aria-label="サイドバー">
-      <div class="sbTop">
-        <div class="brand" title="えいき教材ポータル">
-          <div class="brandMark" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none">
-              <path d="M7 20h10" stroke="#111" stroke-width="2.8" stroke-linecap="round"/>
-              <path d="M6 19V10c0-2 2-3 3-4 1-1 2-2 3-2s2 1 3 2c1 1 3 2 3 4v9" stroke="#111" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M9 12h6" stroke="#111" stroke-width="2.8" stroke-linecap="round"/>
-            </svg>
-          </div>
-          <div class="brandText">
-            <b>えいき教材ポータル</b>
-            <span>カテゴリですぐ移動</span>
-          </div>
-        </div>
-
-        <div class="sbToggles">
-          <button id="toggleSidebar" class="btn small ghost" type="button" title="サイドバーの収納">
-            <span>☰</span> <span style="margin-left:6px;">収納</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="sbScroll">
-        <!-- Pages -->
-        <section class="sbSection" data-keep="pages">
-          <div class="sbSectionTitle"><span>ページ</span><span></span></div>
-          <div class="sbList" id="pageList"></div>
-        </section>
-
-        <!-- Subject -->
-        <section class="sbSection" id="sbSubject">
-          <div class="sbSectionTitle"><span>教科</span><span id="subjectCountText">0件</span></div>
-          <div class="sbList" id="subjectList"></div>
-        </section>
-
-        <!-- Unit -->
-        <section class="sbSection" id="sbUnit">
-          <div class="sbSectionTitle"><span>単元</span><span id="unitHint">教科を選ぶと絞れます</span></div>
-          <div class="sbList" id="unitList"></div>
-        </section>
-
-        <div class="hintBox" id="hintBox">
-          ・教材カードを押して「ひらく」<br>
-          ・「作成」は端末内に保存（別端末には出ません）<br>
-          ・全端末で使うなら、HTMLを書き出してGitHubに置く
-        </div>
-      </div>
-    </aside>
-
-    <!-- Main -->
-    <main class="main">
-      <header class="topPanel">
-        <div class="topRow">
-          <div class="titleBox">
-            <h1>えいき教材ポータル</h1>
-            <p>教科 → 単元でしぼりこみ → カードで開く（検索もOK）</p>
-          </div>
-
-          <div class="searchBox" title="検索（例：数量 / ならべ / 合成分解）">
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M10.5 18.5a8 8 0 1 1 0-16 8 8 0 0 1 0 16Z" stroke="#111" stroke-width="3" stroke-linecap="round"/>
-              <path d="M16.5 16.5 21 21" stroke="#111" stroke-width="3" stroke-linecap="round"/>
-            </svg>
-            <input id="searchInput" type="text" placeholder="検索（例：数量 / 数唱 / 合成分解 / かたち）" />
-          </div>
-        </div>
-
-        <div class="chipRow">
-          <div class="chips" id="kindChips"></div>
-          <div class="rightActions">
-            <button id="btnAll" class="chip on" type="button">すべて</button>
-            <button id="btnUnit" class="chip" type="button">単元</button>
-            <button id="btnPortal" class="chip" type="button">ポータル</button>
-            <button id="btnCreate" class="chip" type="button">作成</button>
-          </div>
-        </div>
-      </header>
-
-      <section class="content" id="content">
-        <!-- List page -->
-        <div id="pageListView">
-          <div class="sectionTop">
-            <div class="badge" id="resultBadge">表示：0件</div>
-            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-              <button id="openCreateQuick" class="btn ghost" type="button">作成</button>
-              <button id="resetFilters" class="btn" type="button">リセット</button>
-            </div>
-          </div>
-
-          <div class="grid" id="grid"></div>
-        </div>
-
-        <!-- Create page -->
-        <div id="pageCreateView" style="display:none;">
-          <div class="sectionTop">
-            <div class="badge">作成（端末内に保存）</div>
-            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-              <button id="backToList" class="btn" type="button">一覧へ</button>
-            </div>
-          </div>
-
-          <div class="formWrap">
-            <div class="panel">
-              <h3>基本情報</h3>
-
-              <div class="row">
-                <label>タイトル</label>
-                <input id="cTitle" type="text" placeholder="例：数量ゲーム いくつ？" />
-              </div>
-
-              <div class="row">
-                <label>教科</label>
-                <select id="cSubject"></select>
-              </div>
-
-              <div class="row">
-                <label>単元</label>
-                <select id="cUnit"></select>
-              </div>
-
-              <div class="row">
-                <label>説明</label>
-                <input id="cDesc" type="text" placeholder="例：みほんとおなじ数量をえらぶ" />
-              </div>
-
-              <div class="row">
-                <label>タグ（任意）</label>
-                <input id="cTags" type="text" placeholder="例：数量,導入,2択" />
-              </div>
-
-              <div class="row">
-                <label>種類</label>
-                <div class="radioRow">
-                  <div class="radio on" data-mode="url" id="modeUrl">
-                    <input type="radio" name="mode" checked />
-                    URLで開く
-                  </div>
-                  <div class="radio" data-mode="html" id="modeHtml">
-                    <input type="radio" name="mode" />
-                    HTMLを貼る
-                  </div>
-                </div>
-              </div>
-
-              <div id="urlBlock">
-                <div class="row">
-                  <label>URL</label>
-                  <input id="cUrl" type="text" placeholder="例：https://minihole.github.io/..." />
-                </div>
-              </div>
-
-              <div id="htmlBlock" style="display:none;">
-                <div class="row" style="align-items:flex-start;">
-                  <label>HTML</label>
-                  <textarea id="cHtml" placeholder="<!doctype html> から最後 </html> まで全部貼ってOK"></textarea>
-                </div>
-              </div>
-
-              <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top: 8px;">
-                <button id="saveLocal" class="btn black" type="button">端末に保存</button>
-                <button id="exportHtml" class="btn" type="button">HTML書き出し</button>
-                <button id="copySnippet" class="btn ghost" type="button">materials.js用1行コピー</button>
-                <button id="clearForm" class="btn ghost" type="button">入力クリア</button>
-              </div>
-
-              <div class="hintBox" style="margin-top:12px;">
-                ・「端末に保存」→このPC/iPadだけに保存（ブラウザ）<br>
-                ・全端末で使うなら「HTML書き出し」→ GitHubにアップ→ materials.jsに追加
-              </div>
-
-              <div class="panel" style="margin-top:12px;">
-                <h3>materials.js に追加する1行（プレビュー）</h3>
-                <div class="mono" id="snippetPreview" style="white-space:pre-wrap; font-weight:900; font-size:12px; color:rgba(17,17,17,.75);"></div>
-              </div>
-            </div>
-
-            <div class="panel">
-              <h3>プレビュー</h3>
-              <iframe id="previewFrame" class="previewFrame" sandbox="allow-scripts allow-forms allow-modals allow-popups allow-same-origin"></iframe>
-              <div class="hintBox" style="margin-top:12px;">
-                ・HTML貼り付けモードの時だけプレビューが動きます<br>
-                ・URLモードは「ひらく」で確認してください
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-    </main>
+  <div class="openSB" id="openSB" title="メニュー">
+    <div class="bars"><i></i><i></i><i></i></div>
   </div>
 
-  <!-- Optional: load published materials list -->
-  <script>
-    /* materials.js がある場合は window.MATERIALS を使う想定 */
-  </script>
-  <script src="./materials.js"></script>
+  <div class="overlay" id="overlay"></div>
+
+  <aside class="sidebar" id="sidebar" aria-label="サイドメニュー">
+    <div class="sbTop">
+      <div class="brand">
+        <div class="brandIcon" aria-hidden="true">🧰</div>
+        <div class="brandText">
+          <div class="t">えいき教材ポータル</div>
+          <div class="s">教科→単元で絞り込み</div>
+        </div>
+      </div>
+      <button class="sbClose" id="closeSB">
+        <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span>閉じる</span>
+      </button>
+    </div>
+
+    <div class="sbSection">
+      <div class="sbSectionHeader">
+        <span>ページ</span><small>操作</small>
+      </div>
+      <div class="sbList">
+        <div class="sbItem active" id="navList">
+          <div class="l">
+            <div class="icon" aria-hidden="true">≡</div>
+            <div class="name">
+              <b>一覧</b><span>教材を探す</span>
+            </div>
+          </div>
+          <div class="count" id="countAll">0</div>
+        </div>
+        <div class="sbItem" id="navCreate">
+          <div class="l">
+            <div class="icon" aria-hidden="true">＋</div>
+            <div class="name">
+              <b>作成</b><span>この端末に保存</span>
+            </div>
+          </div>
+          <div class="count" id="countCustom">0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sbSection">
+      <div class="sbSectionHeader">
+        <span>教科</span><small id="sbSubjectHint">すべて</small>
+      </div>
+      <div class="sbList" id="subjectList"></div>
+    </div>
+
+    <div class="sbSection">
+      <div class="sbSectionHeader">
+        <span>単元</span><small id="sbUnitHint">教科を選ぶ</small>
+      </div>
+      <div class="sbList" id="unitList"></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <section class="header">
+      <div class="hTop">
+        <div class="hTitle">
+          <h1>えいき教材ポータル</h1>
+          <p>カードを押して教材を開く（同一サイト内は全画面で表示）</p>
+        </div>
+        <div class="searchBox">
+          <div class="search" role="search">
+            <span class="glass" aria-hidden="true"></span>
+            <input id="q" placeholder="検索（例：数量 / 数唱 / 合成分解 / かたち）" />
+          </div>
+          <button class="btn primary" id="btnCreateTop">
+            <span class="plus" aria-hidden="true"></span>
+            <span>作成</span>
+          </button>
+          <button class="btn" id="btnResetTop">リセット</button>
+        </div>
+      </div>
+
+      <div class="filters" id="topChips"></div>
+    </section>
+
+    <section class="drawer" id="drawer">
+      <div class="drawerHead">
+        <b>作成（この端末に保存）</b>
+        <button class="btnSmall" id="drawerClose">閉じる</button>
+      </div>
+      <div class="drawerBody">
+        <div class="field">
+          <label>タイトル</label>
+          <input id="fTitle" placeholder="例：数量ゲーム・いくつ？" />
+        </div>
+        <div class="field">
+          <label>教科</label>
+          <select id="fSubject"></select>
+        </div>
+
+        <div class="field">
+          <label>単元</label>
+          <input id="fUnit" placeholder="例：数量 / 数唱 / 合成分解 / SST など" />
+        </div>
+        <div class="field">
+          <label>タグ（カンマ区切り）</label>
+          <input id="fTags" placeholder="例：導入, ゲーム, 2択" />
+        </div>
+
+        <div class="field rowSpan2">
+          <label>説明</label>
+          <textarea id="fDesc" placeholder="何の教材かを短く。"></textarea>
+        </div>
+
+        <div class="field">
+          <label>登録タイプ</label>
+          <select id="fType">
+            <option value="url">URLを登録（おすすめ）</option>
+            <option value="html">HTMLコードを貼って保存（端末内のみ）</option>
+          </select>
+          <div class="hint">
+            ※「ChatGPTで編集」バーを出さないなら、教材をGitHubに置いたURL（同一サイトURL）がおすすめ。<br/>
+            ※HTML貼り付けは「単一HTML版」だけ動きます（Reactのまま貼っても動かないことが多い）。
+          </div>
+        </div>
+
+        <div class="field" id="urlBlock">
+          <label>URL</label>
+          <input id="fUrl" placeholder="例：./tools/math-quantity-001/index.html（同一サイトだと全画面で開ける）" />
+        </div>
+
+        <div class="field rowSpan2" id="htmlBlock" style="display:none;">
+          <label>HTMLコード</label>
+          <textarea id="fHtml" placeholder="<!doctype html> からまるごと貼り付け"></textarea>
+          <div class="hint">※端末内保存なので、別端末・他の先生には共有されません。</div>
+        </div>
+      </div>
+
+      <div class="drawerFoot">
+        <button class="btnSmall" id="btnExport">エクスポート（JSON）</button>
+        <label class="btnSmall" style="display:inline-flex; align-items:center; gap:10px; cursor:pointer;">
+          インポート
+          <input id="importFile" type="file" accept="application/json" style="display:none;" />
+        </label>
+        <button class="btnSmall danger" id="btnClearCustom">端末保存を全削除</button>
+        <button class="btnSmall primary" id="btnSave">保存</button>
+      </div>
+    </section>
+
+    <section class="content" id="content">
+      <div class="metaRow">
+        <div class="metaBadge" id="metaBadge">表示：0件</div>
+        <div class="metaActions"></div>
+      </div>
+
+      <div class="grid" id="grid"></div>
+    </section>
+  </main>
+
+  <!-- Player -->
+  <div class="player" id="player" aria-hidden="true">
+    <div class="bg" id="playerBg"></div>
+    <div class="panel" role="dialog" aria-modal="true">
+      <div class="playerTop">
+        <div class="left">
+          <button class="btnSmall primary" id="playerClose">戻る</button>
+          <div class="title" id="playerTitle">教材</div>
+        </div>
+        <div class="right">
+          <button class="btnSmall" id="playerNewTab">新規タブ</button>
+          <button class="btnSmall" id="playerCopy">URLコピー</button>
+        </div>
+      </div>
+      <iframe id="playerFrame" title="教材プレイヤー"></iframe>
+    </div>
+  </div>
+
+  <!-- Data -->
+  <script src="./materials.js?v=1"></script>
 
   <script>
-    /************************************************************
-     * えいき教材ポータル（GitHub Pages / 1ファイル）
-     * - 教科/単元/種類/検索で絞り込み
-     * - ローカル保存（端末のみ）
-     * - HTML貼り付け→プレビュー→書き出し→GitHubに置ける
-     * - ローカル教材はカードから削除可能
-     ************************************************************/
-
-    const STORAGE_KEY = "tokushi_portal_local_v2";
-
-    // 既定の教科/単元（作成フォーム用）
-    const SUBJECTS = [
-      { key: "算数", units: ["数量", "数唱", "ならべる", "合成分解", "かたち", "くらべる", "時計", "お金", "その他"] },
-      { key: "国語", units: ["語彙", "絵↔ことば", "ひらがな", "ことば作り", "文", "読解", "その他"] },
-      { key: "生活", units: ["買い物", "マナー", "清掃", "調理", "安全", "その他"] },
-      { key: "自立活動", units: ["SST", "コミュニケーション", "感覚", "身体", "その他"] },
-      { key: "ICTツール", units: ["ポータル", "作成ツール", "印刷", "変換", "その他"] },
-      { key: "その他", units: ["未分類"] },
-    ];
-
-    // 種類（materials.js の tags と連動してもOK）
-    const KINDS = [
-      { key: "単元", label: "単元" },
-      { key: "ポータル", label: "ポータル" },
-      { key: "作成", label: "作成" },
-      { key: "ツール", label: "ツール" },
-    ];
-
+    // ===== Helpers =====
     const $ = (id) => document.getElementById(id);
 
-    const appEl = $("app");
-    const toastEl = $("toast");
-    const errBarEl = $("errBar");
+    const LS_CUSTOM = "tokushi_portal_custom_v1";
+    const LS_HIDDEN = "tokushi_portal_hidden_v1";
 
+    const SUBJECT_PRESETS = ["算数", "国語", "生活", "自立活動", "ICTツール", "未分類"];
+
+    function safeJsonParse(s, fallback){
+      try { return JSON.parse(s); } catch(e){ return fallback; }
+    }
+
+    function nowId(prefix="m"){
+      const s = Math.random().toString(36).slice(2, 6) + "-" + Math.random().toString(36).slice(2, 6);
+      return prefix + "-" + s;
+    }
+
+    function isLocalUrl(url){
+      if(!url) return false;
+      if(url.startsWith("http://") || url.startsWith("https://")) return false;
+      return true;
+    }
+
+    function normalizeUrl(url){
+      if(!url) return "";
+      return url.trim();
+    }
+
+    function countBy(arr, keyFn){
+      const m = new Map();
+      for(const it of arr){
+        const k = keyFn(it);
+        m.set(k, (m.get(k)||0) + 1);
+      }
+      return m;
+    }
+
+    // ===== State =====
     const state = {
-      page: "list",             // list | create
-      sbCollapsed: false,
+      sidebarOpen: false,
+      page: "list", // list | create
       subject: "すべて",
       unit: "すべて",
-      kind: "すべて",
-      search: "",
+      chip: "すべて", // top chips (type)
+      q: "",
+      player: { open:false, current:null, lastUrl:"" },
+      data: { base:[], custom:[], hidden:new Set(), allVisible:[] }
     };
 
-    function uid(){
-      return "m-" + Math.random().toString(36).slice(2,10) + "-" + Math.random().toString(36).slice(2,6);
-    }
-
-    function safeArray(x){ return Array.isArray(x) ? x : []; }
-
-    function loadLocal(){
-      try{
-        const raw = localStorage.getItem(STORAGE_KEY);
-        const data = raw ? JSON.parse(raw) : [];
-        return safeArray(data);
-      }catch(e){
-        return [];
-      }
-    }
-
-    function saveLocal(list){
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-    }
-
-    function showToast(msg){
-      toastEl.textContent = msg;
-      toastEl.classList.add("on");
-      clearTimeout(showToast._t);
-      showToast._t = setTimeout(()=>toastEl.classList.remove("on"), 1200);
-    }
-
-    function setError(msg){
-      errBarEl.style.display = "block";
-      errBarEl.innerHTML = `表示できませんでした： <code>${escapeHtml(String(msg)).slice(0,220)}</code>`;
-    }
-
-    function escapeHtml(s){
-      return s.replace(/[&<>"']/g, (c)=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
-    }
-
-    function normalizeTags(tags){
-      if (!tags) return [];
-      if (Array.isArray(tags)) return tags.map(String).map(t=>t.trim()).filter(Boolean);
-      return String(tags).split(",").map(t=>t.trim()).filter(Boolean);
-    }
-
-    function getAllMaterials(){
-      const published = safeArray(window.MATERIALS).map(m => ({
-        ...m,
-        _local: false,
-        tags: normalizeTags(m.tags),
+    // ===== Load Data =====
+    function loadBase(){
+      // materials.js defines window.MATERIALS (array)
+      const base = Array.isArray(window.MATERIALS) ? window.MATERIALS : [];
+      return base.map(m => ({
+        id: m.id || nowId("b"),
+        title: m.title || "（無題）",
+        subject: m.subject || "未分類",
+        unit: m.unit || "未分類",
+        desc: m.desc || "",
+        tags: Array.isArray(m.tags) ? m.tags : [],
+        kind: m.kind || "url", // url | page | file | inline_html
+        url: m.url || "",
+        thumb: m.thumb || ""
       }));
-      const local = loadLocal().map(m => ({
-        ...m,
-        _local: true,
-        tags: normalizeTags(m.tags),
-      }));
-      // ローカルを先に表示したい場合は local.concat(published)
-      return local.concat(published);
     }
 
-    function deriveSubjects(materials){
-      const set = new Set();
-      for (const m of materials){
-        if (m.subject) set.add(String(m.subject));
-      }
-      // 既定の順序を優先しつつ、未知教科も追加
-      const ordered = SUBJECTS.map(s=>s.key).filter(k=>set.has(k));
-      for (const k of set){
-        if (!ordered.includes(k)) ordered.push(k);
-      }
-      return ordered;
+    function loadCustom(){
+      const list = safeJsonParse(localStorage.getItem(LS_CUSTOM), []);
+      if(!Array.isArray(list)) return [];
+      return list;
     }
 
-    function deriveUnits(materials, subject){
-      const set = new Set();
-      for (const m of materials){
-        if (subject !== "すべて" && String(m.subject) !== subject) continue;
-        if (m.unit) set.add(String(m.unit));
-      }
-      const base = SUBJECTS.find(s=>s.key===subject)?.units || [];
-      const ordered = [...base.filter(u=>set.has(u))];
-      for (const u of set){
-        if (!ordered.includes(u)) ordered.push(u);
-      }
-      return ordered;
+    function saveCustom(list){
+      localStorage.setItem(LS_CUSTOM, JSON.stringify(list));
     }
 
-    function countBy(materials, key, filterFn){
-      const map = new Map();
-      for (const m of materials){
-        if (filterFn && !filterFn(m)) continue;
-        const k = m[key] ? String(m[key]) : "未分類";
-        map.set(k, (map.get(k) || 0) + 1);
-      }
-      return map;
+    function loadHidden(){
+      const arr = safeJsonParse(localStorage.getItem(LS_HIDDEN), []);
+      const s = new Set(Array.isArray(arr) ? arr : []);
+      return s;
     }
 
-    function buildThumb(m){
-      // 1) thumb 指定があるならそれを使う（相対/絶対どちらでもOK）
-      if (m.thumb){
-        return `<img src="${escapeHtml(String(m.thumb))}" alt="">`;
-      }
-      // 2) thumbs/{id}.png を試す（無くても壊れない）
-      const guess = m.id ? `./thumbs/${encodeURIComponent(String(m.id))}.png` : "";
-      // 画像が無い場合の表示崩れを避けるため、onerrorで消す
-      if (guess){
-        return `<img src="${guess}" alt="" onerror="this.style.display='none'">`;
-      }
-      return "";
+    function saveHidden(set){
+      localStorage.setItem(LS_HIDDEN, JSON.stringify(Array.from(set)));
     }
 
-    function materialKinds(m){
-      // kind フィルタ用：tags から推定（無ければsubject/unitの有無）
-      const tags = normalizeTags(m.tags).map(t=>t.toLowerCase());
-      if (tags.includes("ポータル") || tags.includes("portal")) return "ポータル";
-      if (tags.includes("作成") || tags.includes("create")) return "作成";
-      if (tags.includes("ツール") || tags.includes("tool")) return "ツール";
-      // urlが本ページならポータル扱い
-      if (m.url && String(m.url).includes("/tokushi-tools/")) return "ポータル";
-      return "単元";
-    }
+    function refreshData(){
+      state.data.base = loadBase();
+      state.data.custom = loadCustom();
+      state.data.hidden = loadHidden();
 
-    function matchesSearch(m, q){
-      if (!q) return true;
-      const s = q.toLowerCase();
-      const hay = [
-        m.title, m.subject, m.unit, m.desc,
-        ...(normalizeTags(m.tags) || []),
-        m.id,
-      ].filter(Boolean).join(" ").toLowerCase();
-      return hay.includes(s);
-    }
+      const merged = [...state.data.base, ...state.data.custom];
 
-    function filteredMaterials(all){
-      return all.filter(m=>{
-        // subject
-        if (state.subject !== "すべて"){
-          if (String(m.subject || "未分類") !== state.subject) return false;
-        }
-        // unit
-        if (state.unit !== "すべて"){
-          if (String(m.unit || "未分類") !== state.unit) return false;
-        }
-        // kind
-        if (state.kind !== "すべて"){
-          if (materialKinds(m) !== state.kind) return false;
-        }
-        // search
-        if (!matchesSearch(m, state.search)) return false;
-        return true;
+      // remove hidden
+      const visible = merged.filter(m => !state.data.hidden.has(m.id));
+
+      // gentle sort
+      visible.sort((a,b)=>{
+        const A = (a.subject||"") + "｜" + (a.unit||"") + "｜" + (a.title||"");
+        const B = (b.subject||"") + "｜" + (b.unit||"") + "｜" + (b.title||"");
+        return A.localeCompare(B, "ja");
       });
+
+      state.data.allVisible = visible;
+      $("countAll").textContent = visible.length;
+
+      const customCount = state.data.custom.filter(m => !state.data.hidden.has(m.id)).length;
+      $("countCustom").textContent = customCount;
     }
 
-    function iconSvg(name){
-      // できるだけ誤解しにくいシンプルな線画
-      const common = `fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"`;
-      if (name === "list"){
-        return `<svg viewBox="0 0 24 24" ${common}><path d="M6 7h14"/><path d="M6 12h14"/><path d="M6 17h14"/><path d="M4 7h0"/><path d="M4 12h0"/><path d="M4 17h0"/></svg>`;
-      }
-      if (name === "create"){
-        return `<svg viewBox="0 0 24 24" ${common}><path d="M12 5v14"/><path d="M5 12h14"/></svg>`;
-      }
-      if (name === "subject"){
-        return `<svg viewBox="0 0 24 24" ${common}><path d="M5 4h14v16H5z"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h5"/></svg>`;
-      }
-      if (name === "unit"){
-        return `<svg viewBox="0 0 24 24" ${common}><path d="M6 6h12v12H6z"/><path d="M6 10h12"/><path d="M10 6v12"/></svg>`;
-      }
-      return `<svg viewBox="0 0 24 24" ${common}><path d="M12 4v16"/><path d="M4 12h16"/></svg>`;
+    // ===== Sidebar open/close =====
+    function setSidebar(open){
+      state.sidebarOpen = open;
+      $("sidebar").classList.toggle("on", open);
+      $("overlay").classList.toggle("on", open);
+      // open button always visible, but overlay click closes
     }
 
-    function sbItemTemplate({ id, title, sub, count, on, icon, onClick }){
-      const el = document.createElement("div");
-      el.className = "sbItem" + (on ? " on" : "");
-      el.setAttribute("role","button");
-      el.setAttribute("tabindex","0");
-      el.dataset.id = id;
-      el.innerHTML = `
-        <div class="sbLeft">
-          <div class="sbIcon" aria-hidden="true">${icon}</div>
-          <div class="sbText">
-            <b>${escapeHtml(title)}</b>
-            ${sub ? `<span>${escapeHtml(sub)}</span>` : `<span></span>`}
+    // ===== Rendering =====
+    function renderTopChips(){
+      const chips = [
+        {id:"すべて", label:"すべて"},
+        {id:"単元", label:"単元"},
+        {id:"ポータル", label:"ポータル"},
+        {id:"ツール", label:"ツール"},
+        {id:"作成", label:"作成"}
+      ];
+      const el = $("topChips");
+      el.innerHTML = "";
+      for(const c of chips){
+        const b = document.createElement("button");
+        b.className = "chip" + (state.chip === c.id ? " on" : "");
+        b.textContent = c.label;
+        b.onclick = () => { state.chip = c.id; state.page="list"; $("drawer").classList.remove("on"); renderAll(); };
+        el.appendChild(b);
+      }
+    }
+
+    function renderSubjectList(){
+      const listEl = $("subjectList");
+      listEl.innerHTML = "";
+
+      const all = state.data.allVisible;
+
+      // include presets + actual
+      const subjects = new Set(SUBJECT_PRESETS);
+      all.forEach(m => subjects.add(m.subject || "未分類"));
+
+      const subjectCounts = countBy(all, m => m.subject || "未分類");
+
+      const makeItem = (name, iconText, count, active) => {
+        const it = document.createElement("div");
+        it.className = "sbItem" + (active ? " active" : "");
+        it.innerHTML = `
+          <div class="l">
+            <div class="icon" aria-hidden="true">${iconText}</div>
+            <div class="name">
+              <b>${name}</b><span>${name==="すべて" ? "全教材" : "この教科だけ"}</span>
+            </div>
           </div>
-        </div>
-        ${typeof count === "number" ? `<div class="sbCount">${count}</div>` : ``}
-      `;
-      const act = ()=> onClick && onClick();
-      el.addEventListener("click", act);
-      el.addEventListener("keydown", (e)=>{
-        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); act(); }
-      });
-      return el;
-    }
-
-    function renderSidebar(all, filtered){
-      // Pages
-      const pageList = $("pageList");
-      pageList.innerHTML = "";
-      pageList.appendChild(sbItemTemplate({
-        id:"page-list",
-        title:"一覧",
-        sub:"教材を探す",
-        count:null,
-        on: state.page === "list",
-        icon: iconSvg("list"),
-        onClick: ()=>{
-          state.page = "list";
-          render();
-        }
-      }));
-      pageList.appendChild(sbItemTemplate({
-        id:"page-create",
-        title:"作成",
-        sub:"端末に保存",
-        count:null,
-        on: state.page === "create",
-        icon: iconSvg("create"),
-        onClick: ()=>{
-          state.page = "create";
-          render();
-        }
-      }));
-
-      // Subject
-      const subjectList = $("subjectList");
-      const subjects = deriveSubjects(all);
-      const subjCount = countBy(all, "subject");
-      $("subjectCountText").textContent = `${all.length}件`;
-
-      subjectList.innerHTML = "";
-      subjectList.appendChild(sbItemTemplate({
-        id:"subj-all",
-        title:"すべて",
-        sub:"全部表示",
-        count: all.length,
-        on: state.subject === "すべて",
-        icon: iconSvg("subject"),
-        onClick: ()=>{
-          state.subject = "すべて";
+          <div class="count">${count}</div>
+        `;
+        it.onclick = () => {
+          state.subject = name;
           state.unit = "すべて";
-          render();
-        }
-      }));
-      for (const s of subjects){
-        const c = subjCount.get(s) || 0;
-        subjectList.appendChild(sbItemTemplate({
-          id:`subj-${s}`,
-          title: s,
-          sub: "この教科だけ",
-          count: c,
-          on: state.subject === s,
-          icon: iconSvg("subject"),
-          onClick: ()=>{
-            state.subject = s;
-            state.unit = "すべて";
-            render();
-          }
-        }));
+          state.page="list";
+          $("drawer").classList.remove("on");
+          renderAll();
+        };
+        return it;
+      };
+
+      listEl.appendChild(makeItem("すべて", "📚", all.length, state.subject==="すべて"));
+
+      const sorted = Array.from(subjects).filter(s=>s!=="すべて").sort((a,b)=>a.localeCompare(b,"ja"));
+      for(const s of sorted){
+        const c = subjectCounts.get(s) || 0;
+        if(c<=0) continue;
+        const icon = (s==="算数")?"🧮":(s==="国語")?"🈁":(s==="生活")?"🏡":(s==="自立活動")?"🧠":(s==="ICTツール")?"🧰":"📌";
+        listEl.appendChild(makeItem(s, icon, c, state.subject===s));
       }
 
-      // Unit
-      const unitList = $("unitList");
-      const units = deriveUnits(all, state.subject);
-      const unitCount = countBy(all, "unit", (m)=>{
-        if (state.subject !== "すべて") return String(m.subject||"未分類") === state.subject;
-        return true;
-      });
-
-      unitList.innerHTML = "";
-      unitList.appendChild(sbItemTemplate({
-        id:"unit-all",
-        title:"すべて",
-        sub:"全単元",
-        count: state.subject === "すべて" ? unitCount.size : (unitCount.get("未分類") ? unitCount.size : unitCount.size),
-        on: state.unit === "すべて",
-        icon: iconSvg("unit"),
-        onClick: ()=>{
-          state.unit = "すべて";
-          render();
-        }
-      }));
-      for (const u of units){
-        const c = unitCount.get(u) || 0;
-        unitList.appendChild(sbItemTemplate({
-          id:`unit-${u}`,
-          title: u,
-          sub: "この単元だけ",
-          count: c,
-          on: state.unit === u,
-          icon: iconSvg("unit"),
-          onClick: ()=>{
-            state.unit = u;
-            render();
-          }
-        }));
-      }
+      $("sbSubjectHint").textContent = state.subject;
     }
 
-    function renderChips(all){
-      const wrap = $("kindChips");
-      wrap.innerHTML = "";
-      // 種類チップは「すべて」を含める
-      const kinds = ["すべて", ...KINDS.map(k=>k.key)];
-      for (const k of kinds){
-        const chip = document.createElement("button");
-        chip.type = "button";
-        chip.className = "chip" + (state.kind === k ? " on" : "");
-        chip.textContent = k;
-        chip.addEventListener("click", ()=>{
-          state.kind = k;
-          render();
+    function renderUnitList(){
+      const el = $("unitList");
+      el.innerHTML = "";
+      const all = state.data.allVisible;
+
+      if(state.subject === "すべて"){
+        $("sbUnitHint").textContent = "教科を選ぶ";
+        // Show a compact note row
+        const note = document.createElement("div");
+        note.style.padding = "10px 12px";
+        note.style.color = "rgba(0,0,0,.65)";
+        note.style.fontWeight = "850";
+        note.style.fontSize = "12px";
+        note.textContent = "教科を選ぶと単元が出ます";
+        el.appendChild(note);
+        return;
+      }
+
+      const filtered = all.filter(m => (m.subject||"未分類") === state.subject);
+      const unitCounts = countBy(filtered, m => m.unit || "未分類");
+      const units = Array.from(unitCounts.keys()).sort((a,b)=>a.localeCompare(b,"ja"));
+
+      const make = (name, count, active) => {
+        const it = document.createElement("div");
+        it.className = "sbItem" + (active ? " active" : "");
+        it.innerHTML = `
+          <div class="l">
+            <div class="icon" aria-hidden="true">▦</div>
+            <div class="name">
+              <b>${name}</b><span>${name==="すべて" ? "全単元" : "この単元だけ"}</span>
+            </div>
+          </div>
+          <div class="count">${count}</div>
+        `;
+        it.onclick = () => {
+          state.unit = name;
+          state.page="list";
+          $("drawer").classList.remove("on");
+          renderAll();
+        };
+        return it;
+      };
+
+      const total = filtered.length;
+      el.appendChild(make("すべて", total, state.unit==="すべて"));
+      for(const u of units){
+        const c = unitCounts.get(u) || 0;
+        if(c<=0) continue;
+        el.appendChild(make(u, c, state.unit===u));
+      }
+
+      $("sbUnitHint").textContent = state.unit;
+    }
+
+    function applyFilters(){
+      const q = (state.q || "").trim().toLowerCase();
+      let arr = state.data.allVisible.slice();
+
+      // subject / unit
+      if(state.subject !== "すべて"){
+        arr = arr.filter(m => (m.subject||"未分類") === state.subject);
+      }
+      if(state.unit !== "すべて"){
+        arr = arr.filter(m => (m.unit||"未分類") === state.unit);
+      }
+
+      // top chip (type-ish): we treat as tags / unit-like
+      if(state.chip !== "すべて"){
+        if(state.chip === "単元"){
+          // show everything except ICTツール? (soft)
+          arr = arr.filter(m => (m.subject||"") !== "ICTツール");
+        } else {
+          // tag match
+          arr = arr.filter(m => (m.tags||[]).includes(state.chip) || (m.unit||"") === state.chip || (m.subject||"") === state.chip);
+        }
+      }
+
+      // query
+      if(q){
+        arr = arr.filter(m=>{
+          const s = [
+            m.title, m.subject, m.unit, m.desc,
+            ...(m.tags||[])
+          ].join(" ").toLowerCase();
+          return s.includes(q);
         });
-        wrap.appendChild(chip);
       }
 
-      // 右アクション（上部の固定チップ）
-      $("btnAll").classList.toggle("on", state.kind === "すべて");
-      $("btnUnit").classList.toggle("on", state.kind === "単元");
-      $("btnPortal").classList.toggle("on", state.kind === "ポータル");
-      $("btnCreate").classList.toggle("on", state.kind === "作成");
+      return arr;
     }
 
-    function openMaterial(m){
-      if (m._local && m.html){
-        const blob = new Blob([String(m.html)], { type: "text/html;charset=utf-8" });
-        const url = URL.createObjectURL(blob);
-        window.open(url, "_blank", "noopener,noreferrer");
-        setTimeout(()=>URL.revokeObjectURL(url), 30_000);
-        return;
-      }
-      if (m.url){
-        window.open(String(m.url), "_blank", "noopener,noreferrer");
-        return;
-      }
-      showToast("URLがありません");
+    function iconForKind(kind){
+      if(kind==="file") return "⬇︎";
+      if(kind==="inline_html") return "⌁";
+      return "▶︎";
     }
 
-    function deleteMaterial(m){
-      if (!m._local) return;
-      if (!confirm("この端末の保存から削除します。よろしいですか？")) return;
-      const local = loadLocal().filter(x => x.id !== m.id);
-      saveLocal(local);
-      showToast("削除しました");
-      render();
-    }
-
-    function renderCard(m){
-      const kind = materialKinds(m);
-      const el = document.createElement("div");
-      el.className = "card";
-
-      const label = `${m.subject || "未分類"} / ${m.unit || "未分類"}`;
-      const tags = normalizeTags(m.tags);
-
-      el.innerHTML = `
-        <div class="thumb">
-          ${buildThumb(m)}
-          <div class="thumbLabel">${escapeHtml(label)}</div>
-          <div class="thumbRight">
-            <span class="pill">${escapeHtml(kind)}</span>
-            ${m._local ? `<span class="pill">端末</span>` : ``}
-          </div>
-        </div>
-        <div class="cardBody">
-          <h3 class="cardTitle">${escapeHtml(m.title || "（無題）")}</h3>
-          <p class="cardDesc">${escapeHtml(m.desc || "説明なし")}</p>
-          <div class="tagRow">
-            ${tags.slice(0,4).map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join("")}
-          </div>
-          <div class="cardActions">
-            <div class="idText">ID: ${escapeHtml(String(m.id || ""))}</div>
-            <div class="actionBtns" id="actions"></div>
-          </div>
-        </div>
-      `;
-
-      const actions = el.querySelector("#actions");
-
-      const openBtn = document.createElement("button");
-      openBtn.className = "btn black";
-      openBtn.type = "button";
-      openBtn.textContent = "ひらく";
-      openBtn.onclick = (e)=>{ e.preventDefault(); openMaterial(m); };
-      actions.appendChild(openBtn);
-
-      if (m._local){
-        const delBtn = document.createElement("button");
-        delBtn.className = "btn ghost";
-        delBtn.type = "button";
-        delBtn.textContent = "削除";
-        delBtn.onclick = (e)=>{ e.preventDefault(); deleteMaterial(m); };
-        actions.appendChild(delBtn);
-      }
-
-      return el;
-    }
-
-    function renderListPage(all){
+    function renderCards(list){
       const grid = $("grid");
       grid.innerHTML = "";
-      const list = filteredMaterials(all);
 
-      $("resultBadge").textContent = `表示：${list.length}件 / 全${all.length}件`;
-
-      if (list.length === 0){
+      if(list.length === 0){
         const empty = document.createElement("div");
-        empty.className = "panel";
         empty.style.gridColumn = "1 / -1";
-        empty.innerHTML = `
-          <h3>見つかりません</h3>
-          <div class="hintBox">検索や教科/単元/種類をリセットしてみてください。</div>
-        `;
+        empty.style.padding = "28px";
+        empty.style.border = "2px dashed rgba(0,0,0,.25)";
+        empty.style.borderRadius = "22px";
+        empty.style.background = "rgba(255,255,255,.65)";
+        empty.style.fontWeight = "950";
+        empty.textContent = "表示する教材がありません（条件をゆるめてね）";
         grid.appendChild(empty);
         return;
       }
 
-      for (const m of list){
-        grid.appendChild(renderCard(m));
+      for(const m of list){
+        const card = document.createElement("div");
+        card.className = "card";
+
+        const topPills = `
+          <div class="tagTop">
+            <span class="pill">${(m.subject||"未分類")}</span>
+            <span class="pill">${(m.unit||"未分類")}</span>
+          </div>
+        `;
+
+        const thumbHtml = m.thumb
+          ? `<img alt="" src="${m.thumb}"/>`
+          : `<div class="ph">${(m.title||"教材").slice(0, 16)}</div>`;
+
+        const tags = (m.tags||[]).slice(0,6).map(t=>`<span class="miniChip">${t}</span>`).join("");
+
+        const isCustom = state.data.custom.some(x => x.id === m.id);
+
+        card.innerHTML = `
+          <div class="thumb">
+            ${topPills}
+            ${thumbHtml}
+          </div>
+          <div class="cardBody">
+            <h3 class="cardTitle">${m.title || "（無題）"}</h3>
+            <p class="cardDesc">${m.desc || ""}</p>
+            <div class="chipsRow">${tags}</div>
+            <div class="cardBottom">
+              <div class="idText">ID: ${m.id}</div>
+              <div class="cardActions">
+                <button class="btnSmall primary" data-act="open">${iconForKind(m.kind)} ひらく</button>
+                <button class="btnSmall" data-act="copy">URL</button>
+                <button class="btnSmall danger" data-act="del">${isCustom ? "削除" : "非表示"}</button>
+              </div>
+            </div>
+          </div>
+        `;
+
+        card.querySelector('[data-act="open"]').onclick = () => openMaterial(m);
+        card.querySelector('[data-act="copy"]').onclick = () => copyText(resolveUrl(m));
+        card.querySelector('[data-act="del"]').onclick = () => deleteMaterial(m, isCustom);
+
+        grid.appendChild(card);
       }
     }
 
+    function resolveUrl(m){
+      if(m.kind === "inline_html") return "（HTML保存）";
+      return normalizeUrl(m.url || "");
+    }
+
+    function copyText(t){
+      if(!t) return;
+      navigator.clipboard?.writeText(t).then(()=>{
+        toast("コピーしました");
+      }).catch(()=>{
+        // fallback
+        const ta = document.createElement("textarea");
+        ta.value = t; document.body.appendChild(ta);
+        ta.select(); document.execCommand("copy");
+        ta.remove();
+        toast("コピーしました");
+      });
+    }
+
+    let toastTimer = null;
+    function toast(msg){
+      let el = document.getElementById("toast");
+      if(!el){
+        el = document.createElement("div");
+        el.id = "toast";
+        el.style.position="fixed";
+        el.style.bottom="14px";
+        el.style.left="50%";
+        el.style.transform="translateX(-50%)";
+        el.style.padding="10px 14px";
+        el.style.border="2px solid #111";
+        el.style.borderRadius="999px";
+        el.style.background="rgba(255,255,255,.94)";
+        el.style.fontWeight="950";
+        el.style.boxShadow="0 12px 28px rgba(0,0,0,.18)";
+        el.style.zIndex="200";
+        document.body.appendChild(el);
+      }
+      el.textContent = msg;
+      el.style.display="block";
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(()=>{ el.style.display="none"; }, 1100);
+    }
+
+    // ===== Player =====
+    function openMaterial(m){
+      // If external URL and not embeddable, open in new tab.
+      if(m.kind === "file"){
+        // direct download/open
+        window.open(m.url, "_blank", "noopener");
+        return;
+      }
+
+      if(m.kind === "inline_html"){
+        showPlayer(m, {srcdoc: m.inlineHtml || ""});
+        return;
+      }
+
+      const url = normalizeUrl(m.url || "");
+      if(!url){
+        toast("URLが空です");
+        return;
+      }
+
+      if(isLocalUrl(url)){
+        // same site -> open inside player iframe
+        // cache busting
+        const bust = (url.includes("?") ? "&" : "?") + "v=" + Date.now();
+        showPlayer(m, {src: url + bust});
+      } else {
+        // external
+        window.open(url, "_blank", "noopener");
+      }
+    }
+
+    function showPlayer(m, opt){
+      state.player.open = true;
+      state.player.current = m;
+
+      $("playerTitle").textContent = (m.title || "教材");
+      $("player").classList.add("on");
+
+      const frame = $("playerFrame");
+      frame.src = "about:blank";
+      frame.removeAttribute("srcdoc");
+
+      if(opt && opt.srcdoc){
+        frame.setAttribute("srcdoc", opt.srcdoc);
+        state.player.lastUrl = "（HTML保存）";
+      } else if(opt && opt.src){
+        frame.src = opt.src;
+        state.player.lastUrl = normalizeUrl(m.url || "");
+      } else {
+        frame.src = "about:blank";
+        state.player.lastUrl = normalizeUrl(m.url || "");
+      }
+
+      $("player").setAttribute("aria-hidden", "false");
+    }
+
+    function closePlayer(){
+      state.player.open = false;
+      state.player.current = null;
+      $("player").classList.remove("on");
+      $("playerFrame").src = "about:blank";
+      $("player").setAttribute("aria-hidden", "true");
+    }
+
+    // ===== Delete / Hide =====
+    function deleteMaterial(m, isCustom){
+      if(isCustom){
+        const ok = confirm("この端末の保存データから削除します。OK？");
+        if(!ok) return;
+        const next = state.data.custom.filter(x => x.id !== m.id);
+        saveCustom(next);
+      } else {
+        const ok = confirm("この教材を“この端末で非表示”にします。OK？\n（GitHubのファイル自体は消えません）");
+        if(!ok) return;
+        state.data.hidden.add(m.id);
+        saveHidden(state.data.hidden);
+      }
+      refreshData();
+      renderAll();
+    }
+
+    // ===== Create =====
     function setPage(page){
       state.page = page;
-      render();
+      $("navList").classList.toggle("active", page==="list");
+      $("navCreate").classList.toggle("active", page==="create");
+
+      const drawer = $("drawer");
+      drawer.classList.toggle("on", page==="create");
+      if(page==="create"){
+        // scroll to drawer
+        drawer.scrollIntoView({behavior:"smooth", block:"start"});
+      }
     }
 
-    // Create page helpers
-    function fillSubjectUnit(){
-      const subjSel = $("cSubject");
-      const unitSel = $("cUnit");
-      subjSel.innerHTML = "";
-      for (const s of SUBJECTS){
-        const opt = document.createElement("option");
-        opt.value = s.key;
-        opt.textContent = s.key;
-        subjSel.appendChild(opt);
+    function renderCreateSubjectOptions(){
+      const sel = $("fSubject");
+      sel.innerHTML = "";
+      const subjects = new Set(SUBJECT_PRESETS);
+      state.data.allVisible.forEach(m => subjects.add(m.subject||"未分類"));
+      const arr = Array.from(subjects).sort((a,b)=>a.localeCompare(b,"ja"));
+      for(const s of arr){
+        const op = document.createElement("option");
+        op.value = s; op.textContent = s;
+        sel.appendChild(op);
+      }
+      sel.value = "算数";
+    }
+
+    function onTypeChange(){
+      const v = $("fType").value;
+      $("urlBlock").style.display = (v==="url") ? "block" : "none";
+      $("htmlBlock").style.display = (v==="html") ? "block" : "none";
+    }
+
+    function saveCreated(){
+      const title = $("fTitle").value.trim();
+      const subject = $("fSubject").value || "未分類";
+      const unit = $("fUnit").value.trim() || "未分類";
+      const desc = $("fDesc").value.trim();
+      const tags = $("fTags").value.split(",").map(s=>s.trim()).filter(Boolean);
+      const type = $("fType").value;
+
+      if(!title){
+        toast("タイトルが必要です");
+        return;
       }
 
-      function fillUnits(){
-        const key = subjSel.value;
-        const units = SUBJECTS.find(s=>s.key===key)?.units || ["未分類"];
-        unitSel.innerHTML = "";
-        for (const u of units){
-          const opt = document.createElement("option");
-          opt.value = u;
-          opt.textContent = u;
-          unitSel.appendChild(opt);
+      let item = {
+        id: nowId("m"),
+        title, subject, unit, desc,
+        tags,
+        kind: "url",
+        url: "",
+        thumb: ""
+      };
+
+      if(type === "url"){
+        const url = normalizeUrl($("fUrl").value);
+        if(!url){
+          toast("URLが必要です");
+          return;
         }
+        item.kind = "url";
+        item.url = url;
+      } else {
+        const html = $("fHtml").value;
+        if(!html.trim()){
+          toast("HTMLコードが空です");
+          return;
+        }
+        item.kind = "inline_html";
+        item.inlineHtml = html;
       }
-      subjSel.addEventListener("change", ()=>{
-        fillUnits();
-        updateSnippetPreview();
-      });
-      unitSel.addEventListener("change", updateSnippetPreview);
 
-      fillUnits();
+      const next = [...state.data.custom, item];
+      saveCustom(next);
+
+      // clear
+      $("fTitle").value = "";
+      $("fUnit").value = "";
+      $("fTags").value = "";
+      $("fDesc").value = "";
+      $("fUrl").value = "";
+      $("fHtml").value = "";
+
+      refreshData();
+      toast("保存しました");
+      state.subject = "すべて";
+      state.unit = "すべて";
+      setPage("list");
+      renderAll();
     }
 
-    function createSnippet(obj){
-      // materials.js の1行（貼りやすい形）
-      const line = {
-        id: obj.id,
-        title: obj.title,
-        subject: obj.subject,
-        unit: obj.unit,
-        desc: obj.desc,
-        tags: obj.tags,
-        url: obj.url || "",
-        thumb: obj.thumb || "",
+    function exportCustom(){
+      const payload = {
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        custom: state.data.custom
       };
-      // 1行で見たいので JSON 風に
-      return `{ id: "${escapeJs(line.id)}", title: "${escapeJs(line.title)}", subject: "${escapeJs(line.subject)}", unit: "${escapeJs(line.unit)}", desc: "${escapeJs(line.desc)}", tags: ${JSON.stringify(line.tags)}, url: "${escapeJs(line.url)}", thumb: "${escapeJs(line.thumb)}" }`;
-    }
-
-    function escapeJs(s){
-      return String(s || "").replace(/\\/g,"\\\\").replace(/"/g,'\\"').replace(/\n/g,"\\n");
-    }
-
-    function getCreateForm(){
-      const mode = $("modeHtml").classList.contains("on") ? "html" : "url";
-      const title = $("cTitle").value.trim();
-      const subject = $("cSubject").value;
-      const unit = $("cUnit").value;
-      const desc = $("cDesc").value.trim();
-      const tags = $("cTags").value.split(",").map(t=>t.trim()).filter(Boolean);
-
-      if (!title) return { ok:false, msg:"タイトルを入れてください" };
-
-      if (mode === "url"){
-        const url = $("cUrl").value.trim();
-        if (!url) return { ok:false, msg:"URLを入れてください" };
-        return { ok:true, mode, title, subject, unit, desc, tags, url, html:"" };
-      }else{
-        const html = $("cHtml").value;
-        if (!html.trim()) return { ok:false, msg:"HTMLを貼ってください" };
-        return { ok:true, mode, title, subject, unit, desc, tags, url:"", html };
-      }
-    }
-
-    function updatePreview(){
-      const isHtml = $("modeHtml").classList.contains("on");
-      const frame = $("previewFrame");
-      if (!isHtml){
-        frame.srcdoc = `<div style="font-family:system-ui;padding:18px;color:#333;"><b>URLモード</b><div style="margin-top:8px;">プレビューは「HTMLを貼る」モードで表示します。</div></div>`;
-        return;
-      }
-      const html = $("cHtml").value || "";
-      // 安全のため、srcdocで表示
-      frame.srcdoc = html;
-    }
-
-    function updateSnippetPreview(){
-      const f = getCreateForm();
-      if (!f.ok){
-        $("snippetPreview").textContent = "（入力するとここに表示されます）";
-        return;
-      }
-      const temp = {
-        id: "your-id",
-        title: f.title,
-        subject: f.subject,
-        unit: f.unit,
-        desc: f.desc || "",
-        tags: f.tags || [],
-        url: f.mode === "url" ? f.url : "（GitHubに置いたURLに差し替え）",
-        thumb: "（任意：thumbs/〜.png）",
-      };
-      $("snippetPreview").textContent = createSnippet(temp);
-    }
-
-    function switchMode(mode){
-      const isUrl = mode === "url";
-      $("modeUrl").classList.toggle("on", isUrl);
-      $("modeHtml").classList.toggle("on", !isUrl);
-      $("urlBlock").style.display = isUrl ? "block" : "none";
-      $("htmlBlock").style.display = isUrl ? "none" : "block";
-      updatePreview();
-      updateSnippetPreview();
-    }
-
-    function clearForm(){
-      $("cTitle").value = "";
-      $("cDesc").value = "";
-      $("cTags").value = "";
-      $("cUrl").value = "";
-      $("cHtml").value = "";
-      switchMode("url");
-      updateSnippetPreview();
-      showToast("入力をクリアしました");
-    }
-
-    function downloadFile(filename, text){
-      const blob = new Blob([text], { type: "text/html;charset=utf-8" });
+      const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
-      a.download = filename;
-      document.body.appendChild(a);
+      a.download = "tokushi-portal-custom.json";
       a.click();
-      a.remove();
-      setTimeout(()=>URL.revokeObjectURL(a.href), 30_000);
+      URL.revokeObjectURL(a.href);
     }
 
-    function renderCreatePage(){
-      updatePreview();
-      updateSnippetPreview();
+    function importCustom(file){
+      const reader = new FileReader();
+      reader.onload = () => {
+        const obj = safeJsonParse(reader.result, null);
+        if(!obj || !Array.isArray(obj.custom)){
+          toast("JSON形式が違います");
+          return;
+        }
+        const merged = [...state.data.custom, ...obj.custom];
+        // de-dup by id
+        const map = new Map();
+        for(const m of merged){
+          map.set(m.id || nowId("m"), m);
+        }
+        saveCustom(Array.from(map.values()));
+        refreshData();
+        renderAll();
+        toast("インポートしました");
+      };
+      reader.readAsText(file);
     }
 
-    function render(){
-      errBarEl.style.display = "none";
-
-      const all = getAllMaterials();
-
-      // Sidebar collapsed
-      appEl.classList.toggle("sb-collapsed", !!state.sbCollapsed);
-
-      // Search
-      $("searchInput").value = state.search;
-
-      // Sidebar
-      renderSidebar(all, filteredMaterials(all));
-
-      // Chips
-      renderChips(all);
-
-      // Page toggles
-      $("pageListView").style.display = (state.page === "list") ? "block" : "none";
-      $("pageCreateView").style.display = (state.page === "create") ? "block" : "none";
-
-      if (state.page === "list"){
-        renderListPage(all);
-      }else{
-        renderCreatePage();
-      }
+    function clearCustom(){
+      const ok = confirm("この端末の保存データ（作成分）を全部削除します。OK？");
+      if(!ok) return;
+      saveCustom([]);
+      refreshData();
+      renderAll();
+      toast("削除しました");
     }
 
-    function init(){
-      // Sidebar toggle
-      $("toggleSidebar").addEventListener("click", ()=>{
-        state.sbCollapsed = !state.sbCollapsed;
-        render();
-      });
+    // ===== Render All =====
+    function renderAll(){
+      renderTopChips();
+      renderSubjectList();
+      renderUnitList();
 
-      // Search
-      $("searchInput").addEventListener("input", (e)=>{
-        state.search = e.target.value || "";
-        render();
-      });
+      const list = applyFilters();
+      $("metaBadge").textContent = `表示：${list.length}件`;
+      renderCards(list);
+    }
 
-      // Top chips quick set
-      $("btnAll").addEventListener("click", ()=>{ state.kind = "すべて"; render(); });
-      $("btnUnit").addEventListener("click", ()=>{ state.kind = "単元"; render(); });
-      $("btnPortal").addEventListener("click", ()=>{ state.kind = "ポータル"; render(); });
-      $("btnCreate").addEventListener("click", ()=>{ state.kind = "作成"; render(); });
+    // ===== Bind events =====
+    function bind(){
+      $("openSB").onclick = () => setSidebar(true);
+      $("closeSB").onclick = () => setSidebar(false);
+      $("overlay").onclick = () => setSidebar(false);
 
-      // Quick buttons
-      $("openCreateQuick").addEventListener("click", ()=>setPage("create"));
-      $("backToList").addEventListener("click", ()=>setPage("list"));
+      $("navList").onclick = () => { setPage("list"); renderAll(); setSidebar(false); };
+      $("navCreate").onclick = () => { setPage("create"); renderAll(); setSidebar(false); };
 
-      $("resetFilters").addEventListener("click", ()=>{
-        state.subject = "すべて";
-        state.unit = "すべて";
-        state.kind = "すべて";
-        state.search = "";
-        render();
-        showToast("リセットしました");
-      });
+      $("btnCreateTop").onclick = () => { setPage("create"); renderAll(); };
+      $("drawerClose").onclick = () => { setPage("list"); renderAll(); };
 
-      // Create form setup
-      fillSubjectUnit();
-      switchMode("url");
-
-      $("modeUrl").addEventListener("click", ()=>switchMode("url"));
-      $("modeHtml").addEventListener("click", ()=>switchMode("html"));
-
-      $("cTitle").addEventListener("input", updateSnippetPreview);
-      $("cDesc").addEventListener("input", updateSnippetPreview);
-      $("cTags").addEventListener("input", updateSnippetPreview);
-      $("cUrl").addEventListener("input", updateSnippetPreview);
-      $("cHtml").addEventListener("input", ()=>{
-        updatePreview();
-        updateSnippetPreview();
-      });
-
-      $("clearForm").addEventListener("click", clearForm);
-
-      $("saveLocal").addEventListener("click", ()=>{
-        const f = getCreateForm();
-        if (!f.ok){ showToast(f.msg); return; }
-
-        const local = loadLocal();
-        const id = uid();
-        const obj = {
-          id,
-          title: f.title,
-          subject: f.subject,
-          unit: f.unit,
-          desc: f.desc || "",
-          tags: f.tags || [],
-          url: f.mode === "url" ? f.url : "",
-          html: f.mode === "html" ? f.html : "",
-          thumb: "",
-          createdAt: Date.now(),
-        };
-        local.unshift(obj);
-        saveLocal(local);
-        showToast("端末に保存しました");
-        // 一覧へ
+      $("btnResetTop").onclick = () => {
+        state.subject="すべて"; state.unit="すべて"; state.q=""; state.chip="すべて";
+        $("q").value = "";
         setPage("list");
+        renderAll();
+        toast("リセットしました");
+      };
+
+      $("q").addEventListener("input", (e)=>{
+        state.q = e.target.value;
+        renderAll();
       });
 
-      $("exportHtml").addEventListener("click", ()=>{
-        const f = getCreateForm();
-        if (!f.ok){ showToast(f.msg); return; }
+      $("fType").onchange = onTypeChange;
+      onTypeChange();
 
-        if (f.mode === "html"){
-          const name = (f.title || "material").replace(/[\\/:*?"<>|]/g,"_").slice(0,50);
-          downloadFile(`${name}.html`, f.html);
-          showToast("HTMLを書き出しました");
-        }else{
-          // URLモードの場合：簡易ランチャーHTMLを書き出す
-          const name = (f.title || "material_link").replace(/[\\/:*?"<>|]/g,"_").slice(0,50);
-          const html = `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(f.title)}</title>
-          <style>body{font-family:system-ui;display:grid;place-items:center;height:100vh;margin:0;background:#f6f3ee;color:#111}a{font-weight:900;font-size:18px;border:3px solid #111;border-radius:999px;padding:14px 18px;text-decoration:none;color:#fff;background:#111}p{margin:12px 0 0;color:rgba(17,17,17,.7);font-weight:800}</style>
-          <a href="${escapeHtml(f.url)}">ひらく</a><p>${escapeHtml(f.desc||"")}</p>`;
-          downloadFile(`${name}.html`, html);
-          showToast("ランチャーHTMLを書き出しました");
+      $("btnSave").onclick = saveCreated;
+      $("btnExport").onclick = exportCustom;
+      $("importFile").addEventListener("change", (e)=>{
+        const f = e.target.files && e.target.files[0];
+        if(f) importCustom(f);
+        e.target.value = "";
+      });
+      $("btnClearCustom").onclick = clearCustom;
+
+      // Player
+      $("playerClose").onclick = closePlayer;
+      $("playerBg").onclick = closePlayer;
+      $("playerNewTab").onclick = ()=>{
+        const m = state.player.current;
+        if(!m) return;
+        if(m.kind === "inline_html"){
+          toast("HTML保存は新規タブにできません");
+          return;
         }
-      });
-
-      $("copySnippet").addEventListener("click", async ()=>{
-        const f = getCreateForm();
-        if (!f.ok){ showToast(f.msg); return; }
-
-        const temp = {
-          id: "your-id",
-          title: f.title,
-          subject: f.subject,
-          unit: f.unit,
-          desc: f.desc || "",
-          tags: f.tags || [],
-          url: f.mode === "url" ? f.url : "（GitHubに置いたURLに差し替え）",
-          thumb: "",
-        };
-        const txt = createSnippet(temp);
-        try{
-          await navigator.clipboard.writeText(txt);
-          showToast("コピーしました");
-        }catch(e){
-          // フォールバック
-          const ta = document.createElement("textarea");
-          ta.value = txt;
-          document.body.appendChild(ta);
-          ta.select();
-          document.execCommand("copy");
-          ta.remove();
-          showToast("コピーしました");
+        const url = normalizeUrl(m.url || "");
+        if(url) window.open(url, "_blank", "noopener");
+      };
+      $("playerCopy").onclick = ()=>{
+        const m = state.player.current;
+        if(!m) return;
+        if(m.kind === "inline_html"){
+          toast("HTML保存はURLがありません");
+          return;
         }
+        copyText(normalizeUrl(m.url||""));
+      };
+      window.addEventListener("keydown", (e)=>{
+        if(e.key==="Escape" && state.player.open) closePlayer();
       });
-
-      updateSnippetPreview();
-
-      render();
     }
 
-    window.addEventListener("error", (e)=>{
-      setError(e.message || e.error || "unknown error");
-    });
-
-    init();
-  </script>
-
-  <!-- サンプル（materials.js が無い時だけ動く） -->
-  <script>
-    if (!Array.isArray(window.MATERIALS) || window.MATERIALS.length === 0){
-      window.MATERIALS = [
-        { id:"tool-001", title:"授業用ICT教材ポータル（今のページ）", subject:"ICTツール", unit:"ポータル", desc:"カード一覧で教材を探せる入口", tags:["ツール","ポータル","検索"], url:"./index.html", thumb:"" },
-        { id:"tool-002", title:"Create_tool2（今あるページ）", subject:"ICTツール", unit:"作成ツール", desc:"既存ページをカードから開くテスト", tags:["ツール","作成","テスト"], url:"./Create_tool2.html", thumb:"" }
-      ];
-    }
+    // ===== Init =====
+    (function init(){
+      refreshData();
+      bind();
+      renderCreateSubjectOptions();
+      renderAll();
+      setSidebar(false);
+    })();
   </script>
 </body>
 </html>
