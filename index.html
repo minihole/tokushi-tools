@@ -1,41 +1,423 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>えいき教材ポータル</title>
   <style>
-    body{margin:0;font-family:system-ui,-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif;background:#0b0f14;color:#e8f0ff}
-    header{padding:18px 16px}
-    h1{margin:0;font-size:22px}
-    .sub{margin:8px 0 0;color:#a8b4c7;font-size:13px;line-height:1.5}
-    .grid{padding:0 16px 20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
-    .card{background:#121a24;border:1px solid rgba(255,255,255,.10);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px;min-height:140px}
-    .card h2{margin:0;font-size:18px}
-    .meta{color:#a8b4c7;font-size:13px;line-height:1.5}
-    .btn{font-size:16px;font-weight:800;padding:12px 14px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:rgba(77,163,255,.18);color:#e8f0ff}
-    .btn:active{transform:scale(.98)}
+    :root{
+      --bg:#ffffff;
+      --ink:#17212b;
+      --sub:#5b6775;
+      --card:#ffffff;
+      --line:#e6e9ee;
+      --shadow: 0 8px 24px rgba(20,25,30,.10);
+      --radius:18px;
+      --accent:#2f7dff;
+      --accent2:#ff4d8d;
+      --chip:#f3f6fb;
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Hiragino Kaku Gothic ProN",
+                   "Noto Sans JP", "Yu Gothic", "Meiryo", sans-serif;
+      color:var(--ink);
+      background:
+        radial-gradient(1200px 600px at 0% 0%, rgba(47,125,255,.10), transparent 60%),
+        radial-gradient(1000px 500px at 100% 0%, rgba(255,77,141,.10), transparent 60%),
+        var(--bg);
+    }
+    header{
+      position:sticky; top:0; z-index:10;
+      background: rgba(255,255,255,.86);
+      backdrop-filter: blur(10px);
+      border-bottom:1px solid var(--line);
+    }
+    .wrap{ max-width:1100px; margin:0 auto; padding:16px 18px; }
+    .top{
+      display:flex; align-items:flex-start; justify-content:space-between; gap:14px;
+      flex-wrap:wrap;
+    }
+    h1{ margin:0; font-size:22px; letter-spacing:.02em; }
+    .note{ margin-top:6px; color:var(--sub); font-size:13px; }
+    .right{
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .search{
+      display:flex; align-items:center; gap:10px;
+      padding:10px 12px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:#fff;
+      min-width:260px;
+      box-shadow: 0 6px 18px rgba(10,20,30,.06);
+    }
+    .search input{
+      border:none; outline:none; width:100%;
+      font-size:14px;
+    }
+    .chips{
+      display:flex; gap:8px; flex-wrap:wrap; padding-top:10px;
+    }
+    .chip{
+      border:1px solid var(--line);
+      background:var(--chip);
+      color:var(--ink);
+      padding:8px 12px;
+      border-radius:999px;
+      font-size:13px;
+      cursor:pointer;
+      user-select:none;
+      transition:.15s transform, .15s background, .15s border-color;
+    }
+    .chip:hover{ transform: translateY(-1px); }
+    .chip.active{
+      background: rgba(47,125,255,.12);
+      border-color: rgba(47,125,255,.35);
+      color:#0d3ea8;
+      font-weight:700;
+    }
+
+    main .wrap{ padding-top:18px; padding-bottom:28px; }
+    .row{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:12px;
+    }
+    .count{ color:var(--sub); font-size:13px; }
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:14px;
+    }
+    @media (max-width: 980px){
+      .grid{ grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 640px){
+      .grid{ grid-template-columns: 1fr; }
+      .search{ min-width: 100%; }
+    }
+
+    .card{
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      background:var(--card);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      display:flex; flex-direction:column;
+      min-height: 220px;
+    }
+    .thumb{
+      height:120px;
+      background: linear-gradient(135deg, rgba(47,125,255,.16), rgba(255,77,141,.14));
+      border-bottom:1px solid var(--line);
+      position:relative;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .thumb img{
+      width:100%; height:100%; object-fit:cover;
+      display:block;
+    }
+    .thumb .fallback{
+      width:92%; height:72%;
+      border-radius:14px;
+      border:1px dashed rgba(23,33,43,.25);
+      background: rgba(255,255,255,.6);
+      display:flex; align-items:center; justify-content:center;
+      font-weight:800;
+      color: rgba(23,33,43,.55);
+      letter-spacing:.08em;
+      font-size:16px;
+    }
+    .body{ padding:12px 12px 10px; display:flex; flex-direction:column; gap:8px; }
+    .title{ font-size:16px; font-weight:900; line-height:1.2; }
+    .desc{ color:var(--sub); font-size:13px; line-height:1.35; min-height:34px; }
+    .meta{
+      display:flex; gap:6px; flex-wrap:wrap; align-items:center;
+      margin-top:2px;
+    }
+    .tag{
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:#fff;
+      color:var(--ink);
+    }
+    .tag.subject{ border-color: rgba(47,125,255,.35); background: rgba(47,125,255,.08); color:#0d3ea8; font-weight:800;}
+    .tag.unit{ border-color: rgba(255,77,141,.35); background: rgba(255,77,141,.08); color:#8a1141; font-weight:800;}
+
+    .actions{
+      margin-top:auto;
+      padding:10px 12px 12px;
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    }
+    .btn{
+      border:none;
+      border-radius:14px;
+      padding:10px 12px;
+      font-size:14px;
+      font-weight:800;
+      cursor:pointer;
+      user-select:none;
+      transition:.15s transform, .15s filter;
+      text-decoration:none;
+      display:inline-flex; align-items:center; gap:8px;
+    }
+    .btn:hover{ transform: translateY(-1px); filter: brightness(1.02); }
+    .btn.primary{
+      background: linear-gradient(135deg, var(--accent), #1f5de0);
+      color:#fff;
+    }
+    .btn.ghost{
+      background:#fff;
+      border:1px solid var(--line);
+      color:var(--ink);
+    }
+    .small{
+      font-size:12px; color:var(--sub);
+    }
+    .footer{
+      color:var(--sub);
+      font-size:12px;
+      padding:14px 18px 26px;
+      text-align:center;
+    }
+    .warn{
+      border:1px solid rgba(255,77,141,.35);
+      background: rgba(255,77,141,.08);
+      color:#8a1141;
+      padding:12px 14px;
+      border-radius: 14px;
+      margin: 12px 0;
+      font-size: 13px;
+      line-height: 1.4;
+    }
   </style>
 </head>
 <body>
-<header>
-  <h1>えいき教材ポータル</h1>
-  <p class="sub">授業中に迷わない入口ページ。カードを押すと教材が開きます。</p>
-</header>
+  <header>
+    <div class="wrap">
+      <div class="top">
+        <div>
+          <h1>えいき教材ポータル</h1>
+          <div class="note">授業中に迷わない入口ページ。カードを押すと教材が開きます。</div>
+        </div>
+        <div class="right">
+          <div class="search" title="タイトル/説明/タグを検索">
+            <span style="font-weight:900;color:rgba(23,33,43,.55)">🔎</span>
+            <input id="q" placeholder="検索（例：数量 / ならべ / かたち）" />
+          </div>
+        </div>
+      </div>
 
-<div class="grid">
-  <div class="card">
-    <h2>教材①（例）</h2>
-    <div class="meta">ここに説明を書けます。</div>
-    <button class="btn" onclick="location.href='./tools/tool1.html'">ひらく</button>
+      <div class="chips" id="subjectChips"></div>
+    </div>
+  </header>
+
+  <main>
+    <div class="wrap">
+      <div id="warn" class="warn" style="display:none"></div>
+
+      <div class="row">
+        <div class="count" id="count"></div>
+        <div class="chips" id="unitChips" style="padding-top:0"></div>
+      </div>
+
+      <div class="grid" id="grid"></div>
+    </div>
+  </main>
+
+  <div class="footer">
+    <div>💡 追加のしかた：<b>materials.js</b> に1行追加 → サムネ画像（任意）を <b>thumbs/</b> に入れる → 教材ファイルを置く</div>
   </div>
 
-  <div class="card">
-    <h2>教材②（例）</h2>
-    <div class="meta">ここに説明を書けます。</div>
-    <button class="btn" onclick="location.href='./tools/tool2.html'">ひらく</button>
-  </div>
-</div>
+  <script src="./materials.js"></script>
+  <script>
+    const WARN = document.getElementById("warn");
+    const qEl = document.getElementById("q");
+    const subjectChips = document.getElementById("subjectChips");
+    const unitChips = document.getElementById("unitChips");
+    const grid = document.getElementById("grid");
+    const count = document.getElementById("count");
 
+    // materials.js が読み込めない時の優しい案内
+    const raw = window.TOKUSHI_MATERIALS;
+    if (!Array.isArray(raw)) {
+      WARN.style.display = "block";
+      WARN.textContent =
+        "materials.js が見つからない/読めない状態です。リポジトリの一番上に「materials.js」を置いて、window.TOKUSHI_MATERIALS = [...] になっているか確認してください。";
+    }
+
+    const MATERIALS = Array.isArray(raw) ? raw : [];
+
+    const state = {
+      subject: "すべて",
+      unit: "すべて",
+      q: ""
+    };
+
+    function uniq(arr){ return [...new Set(arr)].filter(Boolean); }
+
+    function subjects(){
+      return ["すべて", ...uniq(MATERIALS.map(m => m.subject))];
+    }
+    function units(){
+      const base = MATERIALS
+        .filter(m => state.subject === "すべて" ? true : m.subject === state.subject)
+        .map(m => m.unit);
+      return ["すべて", ...uniq(base)];
+    }
+
+    function makeChip(label, active, onClick){
+      const b = document.createElement("button");
+      b.className = "chip" + (active ? " active" : "");
+      b.textContent = label;
+      b.onclick = onClick;
+      return b;
+    }
+
+    function renderChips(){
+      subjectChips.innerHTML = "";
+      subjects().forEach(s=>{
+        subjectChips.appendChild(makeChip(s, state.subject===s, ()=>{
+          state.subject = s;
+          state.unit = "すべて";
+          render();
+        }));
+      });
+
+      unitChips.innerHTML = "";
+      units().forEach(u=>{
+        unitChips.appendChild(makeChip(u, state.unit===u, ()=>{
+          state.unit = u;
+          render();
+        }));
+      });
+    }
+
+    function match(m){
+      if (state.subject !== "すべて" && m.subject !== state.subject) return false;
+      if (state.unit !== "すべて" && m.unit !== state.unit) return false;
+
+      const q = state.q.trim().toLowerCase();
+      if (!q) return true;
+
+      const hay = [
+        m.title, m.desc, m.subject, m.unit,
+        ...(m.tags || [])
+      ].filter(Boolean).join(" ").toLowerCase();
+
+      return hay.includes(q);
+    }
+
+    function card(m){
+      const c = document.createElement("div");
+      c.className = "card";
+
+      const th = document.createElement("div");
+      th.className = "thumb";
+
+      if (m.thumb) {
+        const img = document.createElement("img");
+        img.src = m.thumb;
+        img.alt = m.title;
+        img.onerror = ()=> {
+          th.innerHTML = "";
+          const fb = document.createElement("div");
+          fb.className = "fallback";
+          fb.textContent = (m.subject || "教材").slice(0,2) + " / " + (m.unit || "");
+          th.appendChild(fb);
+        };
+        th.appendChild(img);
+      } else {
+        const fb = document.createElement("div");
+        fb.className = "fallback";
+        fb.textContent = (m.subject || "教材").slice(0,2) + " / " + (m.unit || "");
+        th.appendChild(fb);
+      }
+
+      const body = document.createElement("div");
+      body.className = "body";
+      const title = document.createElement("div");
+      title.className = "title";
+      title.textContent = m.title || "（無題）";
+      const desc = document.createElement("div");
+      desc.className = "desc";
+      desc.textContent = m.desc || "";
+
+      const meta = document.createElement("div");
+      meta.className = "meta";
+
+      const s = document.createElement("span");
+      s.className = "tag subject";
+      s.textContent = m.subject || "未分類";
+      meta.appendChild(s);
+
+      const u = document.createElement("span");
+      u.className = "tag unit";
+      u.textContent = m.unit || "単元";
+      meta.appendChild(u);
+
+      (m.tags || []).slice(0,3).forEach(t=>{
+        const tag = document.createElement("span");
+        tag.className = "tag";
+        tag.textContent = t;
+        meta.appendChild(tag);
+      });
+
+      body.appendChild(title);
+      body.appendChild(desc);
+      body.appendChild(meta);
+
+      const actions = document.createElement("div");
+      actions.className = "actions";
+
+      const open = document.createElement("a");
+      open.className = "btn primary";
+      open.href = m.url || "#";
+      open.target = "_blank";
+      open.rel = "noopener";
+      open.textContent = "▶ ひらく";
+      actions.appendChild(open);
+
+      if (m.file) {
+        const dl = document.createElement("a");
+        dl.className = "btn ghost";
+        dl.href = m.file;
+        dl.target = "_blank";
+        dl.rel = "noopener";
+        dl.textContent = "📎 資料";
+        actions.appendChild(dl);
+      }
+
+      const small = document.createElement("div");
+      small.className = "small";
+      small.textContent = m.id ? `ID: ${m.id}` : "";
+      actions.appendChild(small);
+
+      c.appendChild(th);
+      c.appendChild(body);
+      c.appendChild(actions);
+      return c;
+    }
+
+    function render(){
+      renderChips();
+      const list = MATERIALS.filter(match);
+      count.textContent = `表示：${list.length}件 / 全${MATERIALS.length}件`;
+      grid.innerHTML = "";
+      list.forEach(m => grid.appendChild(card(m)));
+    }
+
+    qEl.addEventListener("input", ()=>{
+      state.q = qEl.value;
+      render();
+    });
+
+    render();
+  </script>
 </body>
 </html>
