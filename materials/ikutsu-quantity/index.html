@@ -1,0 +1,1567 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"
+    />
+    <title>いくつ？（数量）</title>
+    <style>
+      :root{
+        --bg:#0b0f17;
+        --panel:#121a27;
+        --stroke:rgba(255,255,255,.16);
+        --text:rgba(255,255,255,.92);
+        --sub:rgba(255,255,255,.70);
+        --dim:rgba(255,255,255,.55);
+        --accent:#38bdf8;
+        --good:#22c55e;
+        --warn:#fbbf24;
+      }
+      *{box-sizing:border-box}
+      html,body{height:100%;margin:0;font-family:ui-sans-serif,system-ui,-apple-system,"Hiragino Sans","Noto Sans JP","Segoe UI",Arial,sans-serif;background:var(--bg);overflow:hidden}
+      button,input{font-family:inherit}
+      .wrap{
+        width:100vw;height:100vh;
+        display:flex;align-items:center;justify-content:center;
+        padding:10px;
+        background:
+          radial-gradient(1200px 700px at 50% 15%, rgba(56,189,248,0.10), transparent 55%),
+          var(--bg);
+      }
+      .stage{
+        width:min(100vw, calc(100vh * 16 / 9));
+        height:min(100vh, calc(100vw * 9 / 16));
+        max-width:1365px;max-height:768px;
+        border-radius:22px;
+        border:1px solid var(--stroke);
+        background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+        box-shadow:0 18px 50px rgba(0,0,0,0.45);
+        overflow:hidden;
+        position:relative;
+      }
+      .topbar{
+        height:12%; min-height:70px;
+        padding:14px 16px;
+        display:flex;align-items:center;justify-content:space-between;
+        gap:10;
+        border-bottom:1px solid var(--stroke);
+        background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.00));
+      }
+      .title{
+        color:var(--text);
+        font-weight:950;
+        letter-spacing:1px;
+        font-size:clamp(18px, 2.8vw, 34px);
+        line-height:1.05;
+        white-space:nowrap;
+      }
+      .subtitle{
+        color:var(--sub);
+        font-weight:800;
+        font-size:clamp(12px, 1.4vw, 16px);
+        margin-top:6px;
+        line-height:1.1;
+      }
+      .iconbtn{
+        padding:10px 12px;border-radius:14px;
+        border:1px solid var(--stroke);
+        background:rgba(255,255,255,0.04);
+        color:var(--text);
+        font-weight:950;
+        font-size:13px;
+        cursor:pointer;
+        user-select:none;
+        touch-action:manipulation;
+        -webkit-tap-highlight-color:transparent;
+      }
+      .iconbtn.active{
+        border-color:rgba(56,189,248,0.60);
+        background:rgba(56,189,248,0.16);
+        box-shadow:0 0 0 2px rgba(56,189,248,0.18) inset;
+      }
+      .pill{
+        display:inline-flex;align-items:center;gap:8px;
+        padding:8px 12px;border-radius:999px;
+        border:1px solid var(--stroke);
+        background:rgba(255,255,255,0.08);
+        color:var(--sub);
+        font-weight:950;font-size:13px;
+        user-select:none;white-space:nowrap;
+      }
+      .pill.accent{background:rgba(56,189,248,0.14);border-color:rgba(56,189,248,0.55);color:rgba(255,255,255,0.92)}
+      .pill.good{background:rgba(34,197,94,0.14);border-color:rgba(34,197,94,0.55);color:rgba(255,255,255,0.92)}
+      .pill.warn{background:rgba(251,191,36,0.12);border-color:rgba(251,191,36,0.55);color:rgba(255,255,255,0.90)}
+      .main{height:88%;display:flex;flex-direction:column;min-height:0}
+      .content{flex:1;min-height:0;padding:16px;display:flex;gap:14px}
+      .panel{
+        border-radius:20px;border:1px solid var(--stroke);
+        background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+        padding:14px;position:relative;overflow:hidden;
+      }
+      .bigbtn{
+        width:100%;min-height:62px;border-radius:18px;
+        border:1px solid var(--stroke);
+        background:rgba(255,255,255,0.05);
+        color:var(--text);
+        font-weight:950;
+        font-size:clamp(18px,2.2vw,26px);
+        cursor:pointer;user-select:none;
+        box-shadow:0 10px 18px rgba(0,0,0,0.25);
+        touch-action:manipulation;
+        -webkit-tap-highlight-color:transparent;
+      }
+      .bigbtn.accent{background:rgba(56,189,248,0.18);border-color:rgba(56,189,248,0.70)}
+      .bigbtn.good{background:rgba(34,197,94,0.16);border-color:rgba(34,197,94,0.65)}
+      .bigbtn.ghost{background:rgba(255,255,255,0.05);border-color:var(--stroke)}
+      .scroll{overflow:auto;padding-bottom:18px}
+      .row{
+        display:grid;grid-template-columns:220px 1fr;
+        gap:12px;align-items:center;padding:10px 0;
+        border-bottom:1px solid rgba(255,255,255,0.08);
+      }
+      .rowlabel{color:var(--sub);font-weight:900}
+      .seg{
+        padding:10px 12px;border-radius:14px;border:1px solid var(--stroke);
+        background:rgba(255,255,255,0.04);
+        color:var(--text);font-weight:950;
+        cursor:pointer;user-select:none;
+        min-width:64px;
+        touch-action:manipulation;
+        -webkit-tap-highlight-color:transparent;
+      }
+      .seg.on{border-color:rgba(56,189,248,0.70);background:rgba(56,189,248,0.16)}
+      .toggleWrap{display:flex;align-items:center;gap:10px}
+      .togLabel{color:var(--dim);font-weight:900;min-width:38px}
+      .toggle{
+        width:62px;height:34px;border-radius:999px;
+        border:1px solid rgba(255,255,255,0.18);
+        background:rgba(255,255,255,0.06);
+        position:relative;cursor:pointer;
+        touch-action:manipulation;
+        -webkit-tap-highlight-color:transparent;
+      }
+      .toggle.on{border-color:rgba(34,197,94,0.70);background:rgba(34,197,94,0.20)}
+      .knob{
+        position:absolute;top:4px;left:4px;width:26px;height:26px;border-radius:999px;
+        background:rgba(255,255,255,0.92);
+        transition:left 120ms ease;
+        box-shadow:0 10px 18px rgba(0,0,0,0.25);
+      }
+      .toggle.on .knob{left:32px}
+      .grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+      .numCard{
+        min-height:92px;border-radius:18px;border:1px solid var(--stroke);
+        color:var(--text);font-weight:1000;
+        cursor:pointer;user-select:none;
+        box-shadow:0 10px 16px rgba(0,0,0,0.22);
+        display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+        touch-action:manipulation;
+        -webkit-tap-highlight-color:transparent;
+      }
+      .numBig{font-size:clamp(30px,3.8vw,50px);line-height:1}
+      .hintGrid{
+        display:grid;grid-template-columns:repeat(5,var(--cell));gap:var(--gap);
+        justify-content:center;align-content:center;
+      }
+      .hintCell{width:var(--cell);height:var(--cell);display:flex;align-items:center;justify-content:center}
+      .hintOne{width:var(--one);height:var(--one);border-radius:999px;background:rgba(255,255,255,0.78);display:inline-block}
+      .hintTen{
+        width:var(--ten);height:var(--ten);border-radius:999px;
+        background:rgba(56,189,248,0.50);border:1px solid rgba(56,189,248,0.78);
+        display:inline-flex;align-items:center;justify-content:center;
+        color:rgba(255,255,255,0.98);font-weight:950;font-size:10px;line-height:1;
+      }
+      .quizCol{display:flex;flex-direction:column;gap:10px;min-height:0}
+      .qFocus{margin-top:2px;color:var(--text);font-weight:1000;font-size:clamp(18px,2.2vw,26px);line-height:1.2}
+      .qBox{
+        flex:1;min-height:0;border-radius:18px;
+        border:1px solid rgba(255,255,255,0.16);
+        background:rgba(0,0,0,0.12);
+        overflow:hidden;position:relative;
+      }
+      .frameGrid{width:100%;height:100%;display:grid}
+      .cell{
+        position:relative;
+        display:flex;align-items:center;justify-content:center;
+        cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+      }
+      .cellNum{
+        position:absolute;top:6px;left:50%;transform:translateX(-50%);
+        padding:2px 7px;border-radius:999px;background:rgba(0,0,0,0.60);
+        border:1px solid rgba(255,255,255,0.22);
+        color:rgba(255,255,255,0.95);font-weight:950;font-size:12px;line-height:1;
+        pointer-events:none;
+      }
+      .tokWrap{width:var(--sz);height:var(--sz);border-radius:999px;display:flex;align-items:center;justify-content:center}
+      .tokGlow{background:rgba(251,191,36,0.18);filter:drop-shadow(0 0 10px rgba(251,191,36,0.30))}
+      .tokDotSvg{display:block}
+      .tokEmoji{user-select:none;line-height:1}
+      .optGrid{flex:1;min-height:0;display:grid;gap:10px;overflow:hidden}
+      .opt{
+        border-radius:18px;
+        border:2px solid rgba(255,255,255,0.14);
+        background:rgba(255,255,255,0.05);
+        color:var(--text);font-weight:1000;
+        cursor:pointer;user-select:none;
+        box-shadow:0 10px 18px rgba(0,0,0,0.22);
+        display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+        padding:10px;
+        touch-action:manipulation;
+        -webkit-tap-highlight-color:transparent;
+      }
+      .opt.sel{border-color:rgba(56,189,248,0.80);background:rgba(56,189,248,0.16)}
+      .opt.cor{border-color:rgba(34,197,94,0.80);background:rgba(34,197,94,0.16)}
+      .optNum{font-size:clamp(42px,5.2vw,68px);line-height:1}
+      .overlay{
+        position:absolute;inset:0;background:rgba(0,0,0,0.72);
+        display:flex;align-items:center;justify-content:center;
+        padding:18px;
+      }
+      .cardOk{
+        width:min(560px,92%);
+        border-radius:22px;border:2px solid rgba(34,197,94,0.75);
+        background:linear-gradient(180deg,#123a23 0%, #0f1724 70%);
+        box-shadow:0 18px 40px rgba(0,0,0,0.55);
+        padding:18px;text-align:center;
+      }
+      .okText{
+        color:rgba(255,255,255,0.96);
+        font-weight:1000;
+        font-size:clamp(34px,4.6vw,54px);
+        margin-bottom:10px;
+        text-shadow:0 2px 10px rgba(0,0,0,0.35);
+      }
+      .foot{
+        position:absolute;left:14px;bottom:10px;color:rgba(255,255,255,0.30);
+        font-weight:800;font-size:11px;user-select:none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="stage" id="app"></div>
+    </div>
+
+    <script>
+      // ===== helpers =====
+      const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
+      const rand = (a,b)=>a+Math.random()*(b-a);
+      const randi = (a,b)=>Math.floor(rand(a,b+1));
+      const shuffle = (arr)=>{
+        const a=[...arr];
+        for(let i=a.length-1;i>0;i--){
+          const j=Math.floor(Math.random()*(i+1));
+          [a[i],a[j]]=[a[j],a[i]];
+        }
+        return a;
+      };
+
+      const numToJa = (n)=>{
+        const base={0:"れい",1:"いち",2:"に",3:"さん",4:"よん",5:"ご",6:"ろく",7:"なな",8:"はち",9:"きゅう",10:"じゅう"};
+        if(n<=10) return base[n]??String(n);
+        if(n<20) return `じゅう${base[n-10]??String(n-10)}`;
+        if(n===100) return "ひゃく";
+        const tensMap={2:"にじゅう",3:"さんじゅう",4:"よんじゅう",5:"ごじゅう",6:"ろくじゅう",7:"ななじゅう",8:"はちじゅう",9:"きゅうじゅう",10:"ひゃく"};
+        const t=Math.floor(n/10), o=n%10;
+        const tens=tensMap[t]||String(n);
+        if(o===0) return tens;
+        return `${tens}${base[o]??String(o)}`;
+      };
+
+      // ===== voice =====
+      let pickedVoice = null;
+      const pickJaVoice = ()=>{
+        const voices = window.speechSynthesis?.getVoices?.()||[];
+        const ja = voices.filter(v=>String(v.lang||"").toLowerCase().startsWith("ja"));
+        return ja.find(v=>/google/i.test(v.name)) || ja.find(v=>/kyoko/i.test(v.name)) || ja[0] || voices[0] || null;
+      };
+      const refreshVoice = ()=>{ pickedVoice = pickJaVoice(); };
+      if("speechSynthesis" in window){
+        refreshVoice();
+        window.speechSynthesis.onvoiceschanged = refreshVoice;
+      }
+      const safeSpeak = (text, opts={})=>{
+        try{
+          if(!state.settings.voiceOn) return;
+          if(!("speechSynthesis" in window)) return;
+          if(!opts.noCancel) window.speechSynthesis.cancel();
+          const u=new SpeechSynthesisUtterance(text);
+          const v=pickedVoice || pickJaVoice();
+          if(v) u.voice=v;
+          u.lang=(v&&v.lang)||"ja-JP";
+          u.rate=opts.rate??0.92;
+          u.pitch=opts.pitch??1.0;
+          u.volume=clamp((opts.volume??1.0)*(state.settings.volume??0.18)*2.2,0,1);
+          window.speechSynthesis.speak(u);
+          return u;
+        }catch(e){}
+      };
+
+      // ===== audio =====
+      let audioCtx=null;
+      const ensureAudio = ()=>{
+        try{
+          if(!state.settings.soundOn) return null;
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if(!AC) return null;
+          if(!audioCtx) audioCtx=new AC();
+          if(audioCtx.state==="suspended") audioCtx.resume();
+          return audioCtx;
+        }catch(e){ return null; }
+      };
+      const playClick = ()=>{
+        const ctx=ensureAudio(); if(!ctx) return;
+        const t=ctx.currentTime;
+        const o=ctx.createOscillator();
+        const g=ctx.createGain();
+        o.type="triangle";
+        o.frequency.setValueAtTime(520,t);
+        o.frequency.exponentialRampToValueAtTime(320,t+0.06);
+        g.gain.setValueAtTime(0.0001,t);
+        g.gain.exponentialRampToValueAtTime(clamp((state.settings.volume??0.18)*0.35,0.01,0.25),t+0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001,t+0.08);
+        o.connect(g); g.connect(ctx.destination);
+        o.start(t); o.stop(t+0.09);
+      };
+      const playCorrect = ()=>{
+        const ctx=ensureAudio(); if(!ctx) return;
+        const t=ctx.currentTime;
+        const mk=(freq,dt)=>{
+          const o=ctx.createOscillator();
+          const g=ctx.createGain();
+          o.type="sine";
+          o.frequency.setValueAtTime(freq,t+dt);
+          g.gain.setValueAtTime(0.0001,t+dt);
+          g.gain.exponentialRampToValueAtTime(clamp((state.settings.volume??0.18)*0.6,0.02,0.35),t+dt+0.01);
+          g.gain.exponentialRampToValueAtTime(0.0001,t+dt+0.18);
+          o.connect(g); g.connect(ctx.destination);
+          o.start(t+dt); o.stop(t+dt+0.2);
+        };
+        mk(880,0.0); mk(1320,0.08);
+      };
+
+      // ===== data =====
+      const EMOJI = {
+        foods:["🍎","🍌","🍇","🍓","🍙","🍞","🥕","🍊"],
+        vehicles:["🚗","🚌","🚑","🚒","🚲","🚂","✈️","🚁","🚜"],
+        animalsEasy:["🐶","🐱","🐰","🐼","🐟","🦆","🐷","🐭","🐹"],
+        animalsHard:["🦒","🦍","🐋","🦈","🐊","🦏","🐆","🐘","🐖","🦓","🐫"],
+        dinos:["🦖","🦕"],
+        dinosExtra:["🥚","🦴","🌿","🌋","🦎","🐊"],
+      };
+      const EMOJI_NAME = {
+        "🍎":"りんご","🍌":"ばなな","🍇":"ぶどう","🍓":"いちご","🍙":"おにぎり","🍞":"ぱん","🥕":"にんじん","🍊":"みかん",
+        "🚗":"くるま","🚌":"ばす","🚑":"きゅうきゅうしゃ","🚒":"しょうぼうしゃ","🚲":"じてんしゃ","🚂":"でんしゃ","✈️":"ひこうき","🚁":"へり","🚜":"とらくたー",
+        "🐶":"いぬ","🐱":"ねこ","🐰":"うさぎ","🐼":"ぱんだ","🐟":"さかな","🦆":"あひる","🐷":"ぶた","🐭":"ねずみ","🐹":"はむすたー",
+        "🦒":"きりん","🦍":"ごりら","🐋":"くじら","🦈":"さめ","🐊":"わに","🦏":"さい","🐆":"ひょう","🐘":"ぞう","🐖":"ぶた","🦓":"しまうま","🐫":"らくだ",
+        "🦖":"きょうりゅう","🦕":"きょうりゅう",
+      };
+      const THEME_LIST = [
+        {key:"dots", label:"てん", kind:"dot"},
+        {key:"foods", label:"たべもの", kind:"emoji", listKey:"foods"},
+        {key:"animalsEasy", label:"どうぶつ", kind:"emoji", listKey:"animalsEasy"},
+        {key:"animalsHard", label:"どうぶつ（むず）", kind:"emoji", listKey:"animalsHard"},
+        {key:"vehicles", label:"のりもの", kind:"emoji", listKey:"vehicles"},
+        {key:"dinos", label:"きょうりゅう", kind:"emoji", listKey:"dinos"},
+        {key:"random", label:"おまかせ", kind:"mixed"},
+      ];
+
+      const DEFAULT = {
+        choicesCount:4,
+        questionCount:10,
+        level:2,
+        soundOn:true,
+        voiceOn:true,
+        volume:0.18,
+        guideOn:true,
+        teacherMemoOn:false,
+        themeKey:"dots",
+        mixOn:false,
+        sumTwoOn:false,
+        optionDotMode:"bundle10", // bundle10 | onesUpTo20
+      };
+
+      // ===== state =====
+      const state = {
+        screen:"home", // home | settings | quiz | done
+        settings: {...DEFAULT},
+        numPage:0,
+        mode:"main", // main | review
+        round:1,
+        reviewPool:[],
+        qIndex:0,
+        question:null,
+        status:"idle", // idle | correct | hint
+        selected:null,
+        marked:new Set(),
+        guideRunning:false,
+        guideStep:-1,
+        hintToken:0,
+        hintSeq:0,
+        attempts:0,
+        stats:{total:0, perfect:0},
+        wrongBank:[],
+      };
+
+      // ===== difficulty =====
+      const levelInfo = ()=>{
+        const L = clamp(state.settings.level??2,1,6);
+        if(L===1) return {min:1,max:5,style:"frame5"};
+        if(L===2) return {min:1,max:10,style:"frame10"};
+        if(L===3) return {min:1,max:20,style:"frame20"};
+        if(L===4) return {min:1,max:10,style:"scatter"};
+        if(L===5) return {min:1,max:20,style:"scatter"};
+        return {min:1,max:30,style:"scatter"};
+      };
+
+      // ===== scatter =====
+      const makeScatterPositions=(count,w,h,itemSize=44)=>{
+        const positions=[];
+        const margin = clamp(itemSize*0.85,18,54);
+        const area = Math.max(1,(w-margin*2)*(h-margin*2));
+        const ideal = Math.sqrt(area/Math.max(1,count));
+        let minDist = clamp(Math.max(ideal*0.62,itemSize*0.95),20,Math.max(46,itemSize*1.2));
+
+        const attempt=(dist)=>{
+          const ps=[];
+          const tries=8000;
+          for(let t=0;t<tries && ps.length<count;t++){
+            const x=rand(margin,w-margin);
+            const y=rand(margin,h-margin);
+            let ok=true;
+            for(const p of ps){
+              const dx=p.x-x, dy=p.y-y;
+              if(dx*dx+dy*dy < dist*dist){ ok=false; break; }
+            }
+            if(ok) ps.push({x,y});
+          }
+          return ps.length===count ? ps : null;
+        };
+
+        let dist=minDist;
+        for(let k=0;k<10;k++){
+          const got=attempt(dist);
+          if(got) return got;
+          dist*=0.9;
+        }
+
+        const cols=Math.max(3,Math.ceil(Math.sqrt(count)));
+        const rows=Math.ceil(count/cols);
+        const gx=(w-margin*2)/cols;
+        const gy=(h-margin*2)/rows;
+        for(let i=0;i<count;i++){
+          const c=i%cols, r=Math.floor(i/cols);
+          positions.push({
+            x: margin + gx*(c+0.5) + rand(-gx*0.12,gx*0.12),
+            y: margin + gy*(r+0.5) + rand(-gy*0.12,gy*0.12),
+          });
+        }
+        return positions;
+      };
+
+      // ===== question =====
+      const pickTheme=()=>{
+        const key=state.settings.themeKey||"dots";
+        if(key!=="random") return THEME_LIST.find(t=>t.key===key) || THEME_LIST[0];
+        const choices=THEME_LIST.filter(t=>t.key!=="random");
+        return choices[randi(0,choices.length-1)];
+      };
+
+      const buildChoices=(target)=>{
+        const {min,max}=levelInfo();
+        const need=clamp(state.settings.choicesCount??4,2,6);
+        const pool=[];
+        for(let n=min;n<=max;n++) if(n!==target) pool.push(n);
+        const pick=shuffle(pool).slice(0,Math.max(0,need-1));
+        return shuffle([target,...pick]);
+      };
+
+      const makeQuestion=({forcedTarget=null, forcedStyle=null, forcedThemeKey=null}={})=>{
+        const {min,max,style}=levelInfo();
+        let qStyle = forcedStyle || style;
+        let target = forcedTarget ?? randi(min,max);
+
+        const theme = forcedThemeKey
+          ? (THEME_LIST.find(t=>t.key===forcedThemeKey) || pickTheme())
+          : pickTheme();
+
+        let tokens=[];
+        let focus={text:"みほんの かず は いくつ？", label:"みほん"};
+
+        if(theme.kind==="dot" || theme.key==="dots"){
+          tokens = Array.from({length:target}).map(()=>({kind:"dot", countable:true}));
+        }else{
+          const list = EMOJI[theme.listKey] || EMOJI.foods;
+          const getName = (e)=>EMOJI_NAME[e]||"これ";
+          const mixOn=!!state.settings.mixOn;
+          const sumTwoOn=!!state.settings.sumTwoOn;
+          const isDino = theme.listKey==="dinos";
+          if(!forcedStyle && (mixOn||sumTwoOn)) qStyle="scatter";
+
+          if(!mixOn){
+            const e=list[randi(0,list.length-1)];
+            tokens = Array.from({length:target}).map(()=>({kind:"emoji", emoji:e, countable:true}));
+            focus = {text:`${getName(e)} の かず は いくつ？`, label:getName(e)};
+          }else if(mixOn && !sumTwoOn){
+            const e=list[randi(0,list.length-1)];
+            const distractCandidates=list.filter(x=>x!==e);
+            const distractCount = distractCandidates.length>0 ? clamp(Math.round(target*0.35),1,10) : 0;
+            const totalTokens = clamp(target + distractCount, target+1, 30);
+            const ds = Array.from({length: totalTokens-target}).map(()=>({
+              kind:"emoji",
+              emoji: (distractCandidates[randi(0,distractCandidates.length-1)]||e),
+              countable:false
+            }));
+            const cs = Array.from({length:target}).map(()=>({kind:"emoji", emoji:e, countable:true}));
+            tokens = shuffle([...cs,...ds]);
+            focus = isDino
+              ? {text:`${e} の かず は いくつ？`, speak:"この え だけ かぞえて いくつ？", label:"これだけ"}
+              : {text:`${getName(e)} の かず は いくつ？`, label:`${getName(e)}だけ`};
+          }else{
+            if(target<2) target=2;
+            const a=list[randi(0,list.length-1)];
+            let b=list[randi(0,list.length-1)];
+            if(b===a) b=list[(list.indexOf(a)+1)%list.length]||a;
+
+            const aCount=clamp(randi(1,target-1),1,target-1);
+            const bCount=target-aCount;
+
+            let distractCandidates=list.filter(x=>x!==a && x!==b);
+            if(distractCandidates.length===0 && isDino){
+              distractCandidates=(EMOJI.dinosExtra||[]).filter(x=>x!==a && x!==b);
+            }
+            const distractCount=clamp(Math.round(target*0.35),1,10);
+            const totalTokens = distractCount>0 ? clamp(target+distractCount, target+2, 30) : target;
+
+            const ds=Array.from({length:totalTokens-target}).map(()=>({
+              kind:"emoji",
+              emoji: distractCandidates.length ? distractCandidates[randi(0,distractCandidates.length-1)] : a,
+              countable:false
+            }));
+            const csA=Array.from({length:aCount}).map(()=>({kind:"emoji", emoji:a, countable:true}));
+            const csB=Array.from({length:bCount}).map(()=>({kind:"emoji", emoji:b, countable:true}));
+            tokens=shuffle([...csA,...csB,...ds]);
+
+            focus = isDino
+              ? {text:`${a} と ${b} あわせて いくつ？`, speak:"ふたつ あわせて いくつ？", label:"あわせて"}
+              : {text:`${getName(a)} と ${getName(b)} あわせて いくつ？`, label:"あわせて"};
+          }
+        }
+
+        const choices = buildChoices(target);
+        return {
+          id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+          target,
+          style: qStyle,
+          theme,
+          tokens,
+          focus,
+          choices,
+          positions: null,
+        };
+      };
+
+      // ===== guide control =====
+      let guideStopper = ()=>{};
+      const stopGuide = ()=>{
+        try{ guideStopper(); }catch(e){}
+        guideStopper = ()=>{};
+        state.guideRunning=false;
+        state.guideStep=-1;
+      };
+
+      const computeCountOrder = (q)=>{
+        const tokens=q.tokens||[];
+        const countable=(i)=>tokens[i]?.countable!==false;
+        const idxs=[...tokens.keys()];
+        if(q.style!=="scatter") return idxs.filter(countable);
+
+        const ps=q.positions||[];
+        const order=idxs.slice().sort((i,j)=>(ps[i]?.y??0)-(ps[j]?.y??0) || (ps[i]?.x??0)-(ps[j]?.x??0));
+        return order.filter(countable);
+      };
+
+      const startGuide = ()=>{
+        stopGuide();
+        if(!state.settings.guideOn) return;
+        if(state.screen!=="quiz") return;
+        if(!state.question) return;
+
+        // guide uses voice too (counts). cancel old speech.
+        try{ window.speechSynthesis?.cancel?.(); }catch(e){}
+
+        state.marked = new Set();
+        state.guideRunning=true;
+        state.guideStep=-1;
+
+        const q=state.question;
+        const order = computeCountOrder(q);
+        const total = clamp(q.target,1,order.length);
+
+        let stopped=false;
+        const stop = ()=>{
+          stopped=true;
+          try{ window.speechSynthesis?.cancel?.(); }catch(e){}
+          state.guideRunning=false;
+          render();
+        };
+        guideStopper = stop;
+
+        if(state.settings.voiceOn && ("speechSynthesis" in window)){
+          let i=0;
+          const speakNext=()=>{
+            if(stopped) return;
+            if(i>=total){ state.guideRunning=false; render(); return; }
+
+            const text=numToJa(i+1);
+            const u=new SpeechSynthesisUtterance(text);
+            const v=pickedVoice||pickJaVoice();
+            if(v) u.voice=v;
+            u.lang=(v&&v.lang)||"ja-JP";
+            u.rate=0.92; u.pitch=1.0;
+            u.volume=clamp((state.settings.volume??0.18)*2.2*0.55,0,1);
+
+            let finished=false;
+            const doneOne=()=>{
+              if(finished) return;
+              finished=true;
+              if(stopped) return;
+              i+=1;
+              setTimeout(speakNext,70);
+            };
+
+            u.onstart=()=>{
+              if(stopped) return;
+              state.guideStep=i;
+              render();
+            };
+            u.onend=doneOne;
+            u.onerror=doneOne;
+
+            try{ window.speechSynthesis.speak(u); }catch(e){ doneOne(); }
+
+            const ms=clamp(900+text.length*90,900,2200);
+            setTimeout(doneOne,ms);
+          };
+          speakNext();
+          return;
+        }
+
+        // voice off
+        let i=-1;
+        const iv=setInterval(()=>{
+          if(stopped) return;
+          i+=1;
+          if(i>=total){
+            clearInterval(iv);
+            state.guideRunning=false;
+            render();
+            return;
+          }
+          state.guideStep=i;
+          render();
+        },540);
+
+        const prev=guideStopper;
+        guideStopper=()=>{ try{prev();}catch(e){} clearInterval(iv); };
+      };
+
+      // ===== dot hint =====
+      const dotHintHTML = (n, mode="bundle10", big=false)=>{
+        const one = big?10:8;
+        const ten = big?14:12;
+        const cell = Math.max(one,ten);
+        const gap = big?6:4;
+
+        const useBundle = (mode==="bundle10") || (mode==="onesUpTo20" && n>20);
+        const tens = useBundle ? Math.floor(n/10) : 0;
+        const ones = useBundle ? (n%10) : Math.min(n,20);
+
+        const tokens=[];
+        for(let i=0;i<tens;i++) tokens.push("ten");
+        for(let i=0;i<ones;i++) tokens.push("one");
+
+        const cells = tokens.map(t=>{
+          if(t==="one") return `<span class="hintCell"><span class="hintOne"></span></span>`;
+          return `<span class="hintCell"><span class="hintTen">10</span></span>`;
+        }).join("");
+
+        return `
+          <div style="display:flex;justify-content:center;">
+            <div class="hintGrid" style="--cell:${cell}px;--gap:${gap}px;--one:${one}px;--ten:${ten}px;">
+              ${cells}
+            </div>
+          </div>
+        `;
+      };
+
+      // ===== UI helpers =====
+      const colorfulCardBg = (n)=>{
+        const palette=[
+          "rgba(56,189,248,0.22)","rgba(34,197,94,0.18)","rgba(251,191,36,0.18)","rgba(168,85,247,0.18)","rgba(244,63,94,0.16)",
+          "rgba(59,130,246,0.18)","rgba(16,185,129,0.18)","rgba(245,158,11,0.18)","rgba(99,102,241,0.18)","rgba(236,72,153,0.16)"
+        ];
+        return palette[(n-1)%palette.length];
+      };
+
+      const optionGridCfg = (k)=>{
+        if(k<=2) return {cols:1,rows:2,minH:150};
+        if(k<=4) return {cols:2,rows:2,minH:128};
+        return {cols:2,rows:3,minH:104};
+      };
+
+      // ===== navigation =====
+      const resetRound = ()=>{
+        state.stats={total:0, perfect:0};
+        state.wrongBank=[];
+        state.attempts=0;
+        state.marked=new Set();
+        state.status="idle";
+        state.selected=null;
+        stopGuide();
+        state.hintToken+=1;
+        try{ window.speechSynthesis?.cancel?.(); }catch(e){}
+      };
+
+      const goHome = ()=>{
+        playClick();
+        state.hintToken+=1;
+        try{ window.speechSynthesis?.cancel?.(); }catch(e){}
+        state.screen="home";
+        state.mode="main";
+        state.round=1;
+        state.reviewPool=[];
+        state.qIndex=0;
+        resetRound();
+        render();
+      };
+
+      const startQuiz = ()=>{
+        playClick();
+        state.hintToken+=1;
+        state.mode="main";
+        state.round=1;
+        state.reviewPool=[];
+        state.screen="quiz";
+        state.qIndex=0;
+        resetRound();
+        state.question = makeQuestion();
+        render();
+        safeSpeak(state.question.focus?.speak || state.question.focus?.text || "みほんの かず は いくつ？", {rate:0.92, volume:0.9});
+        ensureScatterIfNeeded();
+      };
+
+      const startReview = ()=>{
+        if(!state.wrongBank.length) return;
+        playClick();
+        state.hintToken+=1;
+        state.mode="review";
+        state.round += 1;
+        state.reviewPool = state.wrongBank.slice();
+        state.screen="quiz";
+        state.qIndex=0;
+        resetRound();
+        state.question = state.reviewPool[0];
+        render();
+        safeSpeak("ふくしゅう。", {rate:0.92, volume:0.9});
+        if(state.question?.focus?.text) safeSpeak(state.question.focus.speak || state.question.focus.text, {rate:0.92, volume:0.85, noCancel:true});
+        ensureScatterIfNeeded();
+      };
+
+      const finishSpeakText = (acc, base, rd)=>{
+        const rdJa = rd===1 ? "いっかいめ" : `${numToJa(rd)}かいめ`;
+        if(acc>=1){
+          if(base>=100) return `${rdJa}で ひゃくぱーせんと！ とんでもない！ ひゃくもん ぱーふぇくと！`;
+          if(base>=50) return `${rdJa}で ひゃくぱーせんと！ すんごい！ ごじゅうもん ぱーふぇくと！`;
+          return `${rdJa}で ひゃくぱーせんと！ よくできました！`;
+        }
+        if(acc>=0.8) return "すごい！ とっても いい！";
+        if(acc>=0.6) return "いいね！ このまま つづけよう！";
+        return "できた！ やるたびに のびるよ！";
+      };
+
+      const nextQuestion = ()=>{
+        playClick();
+        state.hintToken+=1;
+
+        const attemptsUsed = Math.max(1, state.attempts || 0);
+        const wasPerfect = (attemptsUsed===1);
+
+        const nextTotal = state.stats.total + 1;
+        const nextPerfect = state.stats.perfect + (wasPerfect ? 1 : 0);
+        state.stats = {total:nextTotal, perfect:nextPerfect};
+
+        if(!wasPerfect && state.question){
+          // keep positions to not shuffle
+          state.wrongBank = [...state.wrongBank, state.question];
+        }
+
+        const baseNeed = clamp(state.settings.questionCount??10,1,100);
+        const totalNeed = state.mode==="main" ? baseNeed : Math.max(1, state.reviewPool.length);
+
+        if(nextTotal >= totalNeed){
+          const acc = nextTotal>0 ? nextPerfect/nextTotal : 0;
+          state.screen="done";
+          stopGuide();
+          render();
+          safeSpeak(finishSpeakText(acc, baseNeed, state.round), {rate:0.92, volume:1.0});
+          return;
+        }
+
+        state.qIndex += 1;
+        state.status="idle";
+        state.selected=null;
+        state.marked=new Set();
+        stopGuide();
+        state.attempts=0;
+
+        if(state.mode==="main"){
+          state.question = makeQuestion();
+        }else{
+          state.question = state.reviewPool[state.qIndex] || state.reviewPool[state.reviewPool.length-1] || makeQuestion();
+        }
+        render();
+        safeSpeak(state.question.focus?.speak || state.question.focus?.text || "みほんの かず は いくつ？", {rate:0.92, volume:0.9});
+        ensureScatterIfNeeded();
+      };
+
+      const choose = (n)=>{
+        ensureAudio();
+        playClick();
+        if(state.status==="correct") return;
+
+        state.attempts += 1;
+        state.selected = n;
+
+        if(n === state.question.target){
+          state.status="correct";
+          playCorrect();
+          render();
+          safeSpeak(`せいかい。${numToJa(n)}。`, {rate:0.92, volume:1.0});
+        }else{
+          state.status="hint";
+          render();
+
+          const token = ++state.hintToken;
+          const msg = "もういちど かぞえてみよう。";
+
+          const fireGuide = ()=>{
+            if(token !== state.hintToken) return;
+            state.hintSeq += 1;
+            startGuide();
+          };
+
+          if(state.settings.voiceOn && ("speechSynthesis" in window)){
+            try{ window.speechSynthesis.cancel(); }catch(e){}
+            try{
+              const u=new SpeechSynthesisUtterance(msg);
+              const v=pickedVoice||pickJaVoice();
+              if(v) u.voice=v;
+              u.lang=(v&&v.lang)||"ja-JP";
+              u.rate=0.92; u.pitch=1.0;
+              u.volume=clamp((state.settings.volume??0.18)*2.2*0.85,0,1);
+
+              let done=false;
+              const fin=()=>{ if(done) return; done=true; fireGuide(); };
+              u.onend=fin; u.onerror=fin;
+              window.speechSynthesis.speak(u);
+
+              const ms=clamp(900+msg.length*70,900,1900);
+              setTimeout(fin,ms);
+            }catch(e){
+              fireGuide();
+            }
+          }else{
+            fireGuide();
+          }
+        }
+      };
+
+      const clearCount = ()=>{
+        playClick();
+        state.hintToken+=1;
+        stopGuide();
+        state.marked=new Set();
+        render();
+      };
+
+      const toggleMark = (idx)=>{
+        const next=new Set(state.marked);
+        if(next.has(idx)) next.delete(idx); else next.add(idx);
+        state.marked=next;
+        render();
+      };
+
+      // ===== scatter position creation after render =====
+      const ensureScatterIfNeeded = ()=>{
+        const q=state.question;
+        if(!q || q.style!=="scatter") return;
+        if(q.positions && q.positions.length===q.tokens.length) return;
+        const box=document.getElementById("qbox");
+        if(!box) return;
+        const rect=box.getBoundingClientRect();
+        const w=Math.max(260,rect.width);
+        const h=Math.max(240,rect.height);
+        const sizeGuess=52;
+        q.positions = makeScatterPositions(q.tokens.length, w, h, sizeGuess);
+        render();
+      };
+
+      // ===== render pieces =====
+      const instructionPill = ()=>{
+        if(state.screen==="home") return `<div class="pill">すうじを おすと よみあげるよ</div>`;
+        if(state.screen==="settings") return `<div class="pill">せってい（せんせい）</div>`;
+        if(state.screen==="done") return `<div class="pill good">できた！</div>`;
+        if(state.status==="correct") return `<div class="pill good">せいかい！</div>`;
+        if(state.status==="hint") return `<div class="pill warn">${state.settings.guideOn ? "ガイドで かぞえよう" : "もういちど"}</div>`;
+        return `<div class="pill">すうじを えらぼう</div>`;
+      };
+
+      const topBarHTML = ()=>{
+        const lv=clamp(state.settings.level,1,6);
+        return `
+          <div class="topbar">
+            <div style="min-width:240px">
+              <div class="title">いくつ？（数量） <span style="font-size:.65em;color:var(--dim);font-weight:900">Lv${lv}</span></div>
+              <div class="subtitle">数量（いくつ）に しぼって れんしゅう</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end">
+              ${instructionPill()}
+              <button class="iconbtn ${state.screen==="home"?"active":""}" data-act="home">ホーム</button>
+              <button class="iconbtn ${state.screen==="settings"?"active":""}" data-act="settings">せってい</button>
+            </div>
+          </div>
+        `;
+      };
+
+      const homeHTML = ()=>{
+        const pageRanges = Array.from({length:10}).map((_,i)=>[i*10+1,i*10+10]);
+        const [a,b]=pageRanges[state.numPage]||[1,10];
+        const nums = Array.from({length:10}).map((_,i)=>a+i).filter(n=>n<=b);
+
+        const rangeBtns = pageRanges.map(([x,y],i)=>{
+          const on=(i===state.numPage);
+          return `<button class="seg ${on?"on":""}" data-act="setPage" data-i="${i}" style="min-width:0">${x}〜${y}</button>`;
+        }).join("");
+
+        const cards = nums.map(n=>`
+          <button class="numCard" data-act="sayNum" data-n="${n}" style="background:${colorfulCardBg(n)}">
+            <div class="numBig">${n}</div>
+            ${dotHintHTML(n,"bundle10",true)}
+          </button>
+        `).join("");
+
+        return `
+          <div class="content" style="flex-direction:column">
+            <div class="panel" style="flex:1;min-height:0;display:flex;flex-direction:column;gap:12px">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div class="pill accent">すうじ（よみあげ）</div>
+                <div class="pill">1〜100</div>
+              </div>
+              <div class="grid5">${rangeBtns}</div>
+              <div class="grid5">${cards}</div>
+              <div style="margin-top:auto;display:grid;gap:10px">
+                <button class="bigbtn accent" data-act="startQuiz">はじめる →</button>
+              </div>
+            </div>
+          </div>
+        `;
+      };
+
+      const toggleHTML = (on, act)=>{
+        return `
+          <div class="toggleWrap">
+            <div class="togLabel">${on?"ON":"OFF"}</div>
+            <div class="toggle ${on?"on":""}" data-act="${act}">
+              <div class="knob"></div>
+            </div>
+          </div>
+        `;
+      };
+
+      const settingsHTML = ()=>{
+        const s=state.settings;
+        const themeBtns = THEME_LIST.map(t=>{
+          const on = s.themeKey===t.key;
+          return `<button class="seg ${on?"on":""}" data-act="setTheme" data-key="${t.key}">${t.label}</button>`;
+        }).join("");
+
+        const lvBtns = [1,2,3,4,5,6].map(lv=>{
+          const on=s.level===lv;
+          return `<button class="seg ${on?"on":""}" data-act="setLevel" data-lv="${lv}">${lv}</button>`;
+        }).join("");
+
+        const ccBtns = [2,4,6].map(k=>{
+          const on=s.choicesCount===k;
+          return `<button class="seg ${on?"on":""}" data-act="setChoices" data-k="${k}">${k} こ</button>`;
+        }).join("");
+
+        const optHintBtns = `
+          <button class="seg ${s.optionDotMode==="bundle10"?"on":""}" data-act="setOptHint" data-m="bundle10">10のまとまり</button>
+          <button class="seg ${s.optionDotMode==="onesUpTo20"?"on":""}" data-act="setOptHint" data-m="onesUpTo20">20まで1こずつ</button>
+        `;
+
+        const lvText = (()=>{
+          if(s.level===1) return "1〜5（5のわく）";
+          if(s.level===2) return "1〜10（10のわく）";
+          if(s.level===3) return "1〜20（10のまとまり）";
+          if(s.level===4) return "1〜10（ばらばら）";
+          if(s.level===5) return "1〜20（ばらばら）";
+          return "1〜30（ばらばら）";
+        })();
+
+        return `
+          <div class="content" style="flex-direction:column;gap:12px">
+            <div style="display:flex;gap:12px;align-items:center">
+              <button class="bigbtn accent" style="flex:1" data-act="startQuiz">▶ スタート（この せっていで）</button>
+              <button class="bigbtn ghost" style="flex:.6;min-height:62px;font-size:clamp(14px,2.0vw,18px)" data-act="resetSettings">もとにもどす</button>
+            </div>
+
+            <div class="panel scroll" style="flex:1;min-height:0">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+                <div class="pill accent">せってい（せんせい）</div>
+                <div class="pill">Lv${clamp(s.level,1,6)}</div>
+              </div>
+
+              <div class="row">
+                <div class="rowlabel">せんたくし の かず</div>
+                <div style="display:flex;gap:10px;flex-wrap:wrap">${ccBtns}</div>
+              </div>
+
+              <div class="row">
+                <div class="rowlabel">もんだい すう</div>
+                <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+                  <input type="range" min="5" max="100" step="1" value="${s.questionCount}" data-act="qCount" style="width:min(520px,62vw)" />
+                  <div class="pill">${s.questionCount} もん</div>
+                  <button class="seg ${s.questionCount===50?"on":""}" data-act="setQCount" data-q="50">🏆 50</button>
+                  <button class="seg ${s.questionCount===100?"on":""}" data-act="setQCount" data-q="100">👹 100</button>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="rowlabel">むずかしさ（Lv）</div>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+                  ${lvBtns}
+                  <div style="color:var(--sub);font-weight:850;margin-left:8px">${lvText}</div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="rowlabel">もんだいの え</div>
+                <div style="display:flex;gap:10px;flex-wrap:wrap">${themeBtns}</div>
+              </div>
+
+              <div class="row">
+                <div class="rowlabel">ガイド（まちがえたら）</div>
+                <div>${toggleHTML(!!s.guideOn,"toggleGuide")}</div>
+              </div>
+
+              <div class="row">
+                <div class="rowlabel">こうかおん</div>
+                <div>${toggleHTML(!!s.soundOn,"toggleSound")}</div>
+              </div>
+
+              <div class="row">
+                <div class="rowlabel">よみあげ</div>
+                <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+                  ${toggleHTML(!!s.voiceOn,"toggleVoice")}
+                  <button class="iconbtn" data-act="voiceTest">🔊 テスト</button>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="rowlabel">おんりょう</div>
+                <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+                  <input type="range" min="0" max="0.5" step="0.01" value="${s.volume}" data-act="vol" style="width:260px" />
+                  <div class="pill">${Math.round(s.volume*100)}%</div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="rowlabel">すうじの ヒント（てん）</div>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+                  ${optHintBtns}
+                  <div style="color:var(--sub);font-weight:850">（どちらも 5こで 1れつ）</div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="rowlabel">はってん（ミックス）</div>
+                <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+                  ${toggleHTML(!!s.mixOn,"toggleMix")}
+                  <div style="color:var(--sub);font-weight:850">（まぎれた中から 1つを数える）</div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="rowlabel">ちょうはってん（あわせて）</div>
+                <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;opacity:${s.mixOn?1:0.6}">
+                  ${toggleHTML(!!s.sumTwoOn,"toggleSumTwo")}
+                  <div style="color:var(--sub);font-weight:850">（2しゅるいの かずを たす）</div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="rowlabel">先生用メモ（けっか）</div>
+                <div>${toggleHTML(!!s.teacherMemoOn,"toggleTeacherMemo")}</div>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:12px">
+              <button class="bigbtn ghost" style="flex:1" data-act="home">ホームへ</button>
+              <button class="bigbtn accent" style="flex:1" data-act="startQuiz">この せっていで はじめる →</button>
+            </div>
+          </div>
+        `;
+      };
+
+      const tokenSizePx = (q)=>{
+        if(!q) return 52;
+        const t=clamp(q.target??1,1,30);
+        const style=q.style;
+        let base=62;
+        if(style==="frame5") base=74;
+        else if(style==="frame10") base=66;
+        else if(style==="frame20") base=62;
+        else base=64;
+        const k = style==="scatter" ? (q.tokens?.length??t) : t;
+        const scale = clamp(1.22 - (k-1)*(style==="scatter"?0.017:0.027), 0.62, 1.22);
+        return Math.round(clamp(base*scale,24,78));
+      };
+
+      const guideSets = ()=>{
+        const q=state.question;
+        const set=new Set();
+        const numMap=new Map();
+        if(!q || !state.guideRunning) return {set,numMap};
+
+        const order = computeCountOrder(q);
+        const upto = clamp(state.guideStep, -1, order.length-1);
+        for(let i=0;i<=upto;i++) set.add(order[i]);
+
+        const lv=clamp(state.settings.level??2,1,6);
+        if(lv<=3 && q.style!=="scatter"){
+          for(let i=0;i<=upto;i++) numMap.set(order[i], i+1);
+        }
+        return {set,numMap};
+      };
+
+      const tokenHTML = (t, highlighted, sz, dim=false)=>{
+        const glow = highlighted ? " tokGlow" : "";
+        if(t.kind==="dot"){
+          const r = 24;
+          return `
+            <div class="tokWrap${glow}" style="--sz:${sz}px">
+              <svg class="tokDotSvg" width="${sz}" height="${sz}" viewBox="0 0 100 100">
+                ${highlighted ? `<circle cx="50" cy="50" r="46" fill="rgba(251,191,36,0.18)"></circle>` : ``}
+                <circle cx="50" cy="50" r="${r}" fill="rgba(255,255,255,0.92)"></circle>
+              </svg>
+            </div>
+          `;
+        }
+        const fs = Math.max(18, Math.round(sz*0.78));
+        return `
+          <div class="tokWrap${glow}" style="--sz:${sz}px;opacity:${dim?0.55:0.98}">
+            <div class="tokEmoji" style="font-size:${fs}px">${t.emoji}</div>
+          </div>
+        `;
+      };
+
+      const frameHTML = (q, cols, rows, offset)=>{
+        const {set:gs, numMap} = guideSets();
+        const sz = tokenSizePx(q);
+        const line="rgba(255,255,255,0.10)";
+        const slots=cols*rows;
+        const cells = Array.from({length:slots}).map((_,idx)=>{
+          const r=Math.floor(idx/cols);
+          const c=idx%cols;
+          const abs=offset+idx;
+          const token=q.tokens[abs];
+          const shown=!!token;
+          const highlighted = shown && (state.marked.has(abs) || gs.has(abs));
+          const dim = shown && (token.countable===false);
+          const num = numMap.has(abs) ? `<div class="cellNum">${numMap.get(abs)}</div>` : "";
+          return `
+            <div class="cell" data-act="tapTok" data-idx="${abs}"
+              style="
+                border-right:${c<cols-1?`1px solid ${line}`:"none"};
+                border-bottom:${r<rows-1?`1px solid ${line}`:"none"};
+                cursor:${shown?"pointer":"default"};
+              ">
+              ${shown ? (num + tokenHTML(token, highlighted, sz, dim)) : ""}
+            </div>
+          `;
+        }).join("");
+        return `
+          <div class="qBox" id="qbox">
+            <div class="frameGrid" style="grid-template-columns:repeat(${cols},1fr);grid-template-rows:repeat(${rows},1fr)">${cells}</div>
+          </div>
+        `;
+      };
+
+      const scatterHTML = (q)=>{
+        const {set:gs} = guideSets();
+        const sz = tokenSizePx(q);
+        const box = clamp(sz+16,36,90);
+        const ps = q.positions || [];
+        const items = q.tokens.map((t,idx)=>{
+          const p = ps[idx] || {x:40+(idx%6)*(box*0.95), y:40+Math.floor(idx/6)*(box*0.78)};
+          const highlighted = state.marked.has(idx) || gs.has(idx);
+          const dim = (t.countable===false);
+          return `
+            <div
+              data-act="tapTok" data-idx="${idx}"
+              style="
+                position:absolute;
+                left:${p.x - box/2}px; top:${p.y - box/2}px;
+                width:${box}px; height:${box}px;
+                display:flex;align-items:center;justify-content:center;
+                border-radius:999px; cursor:pointer;
+                touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+                filter:${highlighted?"drop-shadow(0 0 12px rgba(251,191,36,0.35))":"none"};
+              "
+            >
+              ${tokenHTML(t, highlighted, sz, dim)}
+            </div>
+          `;
+        }).join("");
+        return `
+          <div class="qBox" id="qbox">
+            ${items}
+          </div>
+        `;
+      };
+
+      const quizHTML = ()=>{
+        const q=state.question;
+        const baseNeed = clamp(state.settings.questionCount??10,1,100);
+        const totalNeed = state.mode==="main" ? baseNeed : Math.max(1, state.reviewPool.length);
+        const themeLabel = q.theme?.label || "てん";
+        const rightPill = state.status==="idle" ? "すうじを おそう" : (state.status==="correct" ? "せいかい！" : "ヒント");
+
+        const leftBox = (()=>{
+          if(q.style==="frame5") return frameHTML(q,5,1,0);
+          if(q.style==="frame10") return frameHTML(q,5,2,0);
+          if(q.style==="frame20"){
+            return `
+              <div style="display:grid;grid-template-rows:1fr 1fr;gap:10px;flex:1;min-height:0">
+                ${frameHTML(q,5,2,0).replace('id="qbox"','id="qbox1"')}
+                ${frameHTML(q,5,2,10).replace('id="qbox"','id="qbox2"')}
+              </div>
+            `;
+          }
+          return scatterHTML(q);
+        })();
+
+        const k=clamp(state.settings.choicesCount??4,2,6);
+        const cfg=optionGridCfg(k);
+        const optCols = cfg.cols;
+
+        const options = q.choices.map(n=>{
+          const isSel = (state.selected===n);
+          const isCor = (state.status==="correct" && n===q.target);
+          return `
+            <button class="opt ${isCor?"cor":(isSel?"sel":"")}" data-act="choose" data-n="${n}" style="min-height:${cfg.minH}px">
+              <div class="optNum">${n}</div>
+              ${dotHintHTML(n, state.settings.optionDotMode||"bundle10", false)}
+            </button>
+          `;
+        }).join("");
+
+        const overlay = (state.status==="correct") ? `
+          <div class="overlay">
+            <div class="cardOk">
+              <div class="okText">⭕️ せいかい！</div>
+              <button class="bigbtn good" data-act="next">つぎへ →</button>
+            </div>
+          </div>
+        ` : "";
+
+        const hintText = (state.status==="hint")
+          ? (state.settings.guideOn ? "ヒント：うえから かぞえるよ（ひかる）" : "ヒント：もういちど かぞえてみよう")
+          : "まちがえても OK（ヒントで もういちど）";
+
+        return `
+          <div class="content">
+            <div class="panel quizCol" style="flex:1.12">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div class="pill accent">みほん</div>
+                <div class="pill">${state.mode==="review" ? `ふくしゅう ${state.qIndex+1}/${totalNeed}` : `もんだい ${state.qIndex+1}/${totalNeed}`}</div>
+              </div>
+
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+                <div class="pill">${themeLabel}</div>
+                <div class="pill ${state.status==="hint"?"warn":""}">${state.guideRunning ? "ガイド中" : "タップで かぞえる"}</div>
+              </div>
+
+              <div style="flex:1;min-height:0;display:flex;flex-direction:column">
+                ${leftBox}
+              </div>
+
+              <div style="display:flex;gap:10px">
+                <button class="bigbtn ghost" style="min-height:58px" data-act="clear">カウント クリア</button>
+              </div>
+
+              <div style="color:var(--sub);font-weight:850;line-height:1.35">${hintText}</div>
+            </div>
+
+            <div class="panel quizCol" style="flex:0.88">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div class="pill">えらぶ</div>
+                <div class="pill ${state.status==="correct"?"good":(state.status==="hint"?"warn":"")}">${rightPill}</div>
+              </div>
+
+              <div class="qFocus">${q.focus?.text || "みほんの かず は いくつ？"}</div>
+
+              <div class="optGrid" style="grid-template-columns:repeat(${optCols},1fr)">${options}</div>
+
+              ${overlay}
+            </div>
+          </div>
+        `;
+      };
+
+      const doneHTML = ()=>{
+        const total=state.stats.total||0;
+        const perfect=state.stats.perfect||0;
+        const acc = total>0 ? perfect/total : 0;
+        const pct = Math.round(acc*100);
+        const baseNeed = clamp(state.settings.questionCount??10,1,100);
+        const roundLabel = (state.round===1) ? "1かいめ" : `${numToJa(state.round)}かいめ`;
+        const tag = baseNeed>=100 ? "👹 100もん" : baseNeed>=50 ? "🏆 50もん" : `${baseNeed} もん`;
+
+        let badge;
+        if(acc>=1){
+          if(baseNeed>=100) badge={icon:"💮👑👹💥", title:`${roundLabel}で 100%！`, text:"👹が…たおれた！！とんでもない！100もん パーフェクト！！🔥👑💮"};
+          else if(baseNeed>=50) badge={icon:"💮👑🏆", title:`${roundLabel}で 100%！`, text:"すんごい！50もん パーフェクト！！🏆👑💮✨"};
+          else badge={icon:"💮👑", title:`${roundLabel}で 100%！`, text:"よくできました！ぜんぶ いっかいで できた！✨👑💮"};
+        }else if(acc>=0.8){
+          badge={icon:"⭕️👌", title:"すごい！", text:"とっても いい！よく かぞえられたね！⭕️👌✨"};
+        }else if(acc>=0.6){
+          badge={icon:"⭕️👍", title:"いいね！", text:"いいちょうし！このまま つづけよう！👍✨"};
+        }else{
+          badge={icon:"🌱🙂", title:"できた！", text:"できた！やるたびに どんどん のびるよ🌱🙂✨"};
+        }
+
+        const wrong = state.wrongBank.length;
+
+        return `
+          <div class="content" style="flex-direction:column">
+            <div class="panel" style="flex:1;display:flex;flex-direction:column;gap:12px">
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <div class="pill good">けっか</div>
+                <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
+                  ${state.mode==="review" ? `<div class="pill accent">ふくしゅう ${roundLabel}</div>` : ``}
+                  <div class="pill">${tag}</div>
+                </div>
+              </div>
+
+              <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap">
+                <div>
+                  <div style="color:var(--text);font-weight:1000;font-size:clamp(34px,5.2vw,64px);line-height:1">${badge.icon}</div>
+                  <div style="color:var(--text);font-weight:1000;font-size:clamp(24px,3.0vw,40px);margin-top:8px;line-height:1.05">${badge.title}</div>
+                </div>
+                <div style="text-align:right">
+                  <div class="pill">せいとうりつ ${pct}%</div>
+                  <div style="height:8px"></div>
+                  <div class="pill">${perfect}/${total}（いっかいで）</div>
+                  ${wrong>0 ? `<div style="height:8px"></div><div class="pill warn">まちがい ${wrong} もん</div>` : ``}
+                </div>
+              </div>
+
+              <div style="padding:14px;border-radius:18px;border:1px solid var(--stroke);background:rgba(255,255,255,0.05);color:var(--text);font-weight:950;font-size:clamp(16px,2.1vw,22px);line-height:1.35">
+                ${badge.text}
+              </div>
+
+              ${state.settings.teacherMemoOn ? `
+                <div style="padding:14px;border-radius:18px;border:1px solid var(--stroke);background:rgba(255,255,255,0.04);color:var(--sub);font-weight:850;line-height:1.5">
+                  <div style="color:var(--text);font-weight:950;margin-bottom:6px">先生用メモ</div>
+                  ・「いっかいで正解」の割合＝正答率として表示<br/>
+                  ・ミックスON時は「数える対象だけ」薄く見える<br/>
+                  ・必要なら具体物（おはじき/ブロック）へ
+                </div>
+              `:``}
+
+              <div style="margin-top:auto;display:grid;gap:12px">
+                ${wrong>0 ? `<button class="bigbtn accent" data-act="review">まちがいを ふくしゅう →</button>` : ``}
+                <div style="display:flex;gap:12px">
+                  <button class="bigbtn accent" style="flex:1" data-act="again">もういちど →</button>
+                  <button class="bigbtn ghost" style="flex:1" data-act="home">ホームへ</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      };
+
+      // ===== main render =====
+      const app = document.getElementById("app");
+      const render = ()=>{
+        const lv = clamp(state.settings.level,1,6);
+        let main = "";
+        if(state.screen==="home") main = homeHTML();
+        else if(state.screen==="settings") main = settingsHTML();
+        else if(state.screen==="quiz") main = quizHTML();
+        else main = doneHTML();
+
+        app.innerHTML = `
+          ${topBarHTML()}
+          <div class="main">${main}</div>
+          <div class="foot">Quantity ver. / iPad横 16:9</div>
+        `;
+
+        attachHandlers();
+        // frame20 has 2 boxes; ensure scatter only if needed
+        ensureScatterIfNeeded();
+      };
+
+      const attachHandlers = ()=>{
+        app.querySelectorAll("[data-act]").forEach(el=>{
+          el.addEventListener("pointerdown",(e)=>{
+            e.preventDefault();
+
+            // unlock audio on first touch
+            ensureAudio();
+
+            const act = el.getAttribute("data-act");
+
+            // top nav
+            if(act==="home"){ goHome(); return; }
+            if(act==="settings"){
+              playClick();
+              state.screen = (state.screen==="settings") ? "home" : "settings";
+              render();
+              return;
+            }
+
+            // home
+            if(act==="setPage"){
+              playClick();
+              state.numPage = Number(el.getAttribute("data-i")||"0");
+              render();
+              return;
+            }
+            if(act==="sayNum"){
+              const n=Number(el.getAttribute("data-n"));
+              playClick();
+              safeSpeak(`${numToJa(n)}。`, {rate:0.92, volume:0.9});
+              return;
+            }
+            if(act==="startQuiz"){ startQuiz(); return; }
+
+            // settings controls
+            if(act==="resetSettings"){
+              playClick();
+              state.settings = {...DEFAULT};
+              render();
+              return;
+            }
+            if(act==="setChoices"){
+              playClick();
+              state.settings.choicesCount = Number(el.getAttribute("data-k"));
+              render();
+              return;
+            }
+            if(act==="qCount"){
+              // range input: handled in input listener below
+              return;
+            }
+            if(act==="setQCount"){
+              playClick();
+              state.settings.questionCount = Number(el.getAttribute("data-q"));
+              render();
+              return;
+            }
+            if(act==="setLevel"){
+              playClick();
+              state.settings.level = Number(el.getAttribute("data-lv"));
+              render();
+              return;
+            }
+            if(act==="setTheme"){
+              playClick();
+              state.settings.themeKey = el.getAttribute("data-key");
+              render();
+              return;
+            }
+            if(act==="toggleGuide"){ playClick(); state.settings.guideOn = !state.settings.guideOn; render(); return; }
+            if(act==="toggleSound"){ playClick(); state.settings.soundOn = !state.settings.soundOn; render(); return; }
+            if(act==="toggleVoice"){ playClick(); state.settings.voiceOn = !state.settings.voiceOn; render(); return; }
+            if(act==="voiceTest"){
+              playClick();
+              safeSpeak("せってい かくにん。よみあげ。", {rate:0.92, volume:0.95});
+              return;
+            }
+            if(act==="vol"){ return; }
+            if(act==="setOptHint"){
+              playClick();
+              state.settings.optionDotMode = el.getAttribute("data-m");
+              render();
+              return;
+            }
+            if(act==="toggleMix"){
+              playClick();
+              state.settings.mixOn = !state.settings.mixOn;
+              if(!state.settings.mixOn) state.settings.sumTwoOn = false;
+              render();
+              return;
+            }
+            if(act==="toggleSumTwo"){
+              if(!state.settings.mixOn) return;
+              playClick();
+              state.settings.sumTwoOn = !state.settings.sumTwoOn;
+              render();
+              return;
+            }
+            if(act==="toggleTeacherMemo"){
+              playClick();
+              state.settings.teacherMemoOn = !state.settings.teacherMemoOn;
+              render();
+              return;
+            }
+
+            // quiz
+            if(act==="tapTok"){
+              const idx=Number(el.getAttribute("data-idx"));
+              if(Number.isFinite(idx)) toggleMark(idx);
+              return;
+            }
+            if(act==="choose"){
+              const n=Number(el.getAttribute("data-n"));
+              if(Number.isFinite(n)) choose(n);
+              return;
+            }
+            if(act==="clear"){ clearCount(); return; }
+            if(act==="next"){ nextQuestion(); return; }
+
+            // done
+            if(act==="again"){ startQuiz(); return; }
+            if(act==="review"){ startReview(); return; }
+          }, {passive:false});
+        });
+
+        // range inputs (settings)
+        const qc = app.querySelector('input[type="range"][data-act="qCount"]');
+        if(qc){
+          qc.addEventListener("input",(e)=>{
+            state.settings.questionCount = Number(e.target.value);
+            render();
+          }, {passive:true});
+        }
+        const vol = app.querySelector('input[type="range"][data-act="vol"]');
+        if(vol){
+          vol.addEventListener("input",(e)=>{
+            state.settings.volume = Number(e.target.value);
+            render();
+          }, {passive:true});
+        }
+      };
+
+      // ===== init =====
+      state.question = makeQuestion({forcedTarget:2, forcedStyle:"frame5", forcedThemeKey:"dots"});
+      render();
+    </script>
+  </body>
+</html>
