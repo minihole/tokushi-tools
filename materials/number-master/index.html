@@ -1286,12 +1286,15 @@
             bind(id, fn) {
                 const el = document.getElementById(id);
                 if (!el) return;
-                const h = (e) => {
-                    e.preventDefault(); e.stopPropagation();
+
+                const run = (e) => {
+                    try { e?.stopPropagation?.(); } catch (_) { }
                     fn(e);
                 };
-                el.addEventListener('touchstart', h, { passive: false });
-                el.addEventListener('click', h);
+
+                // ✅ iPadで音を殺しにくい：touchstartではなくtouchend
+                el.addEventListener("touchend", run, { passive: true });
+                el.addEventListener("click", run);
             },
 
             // Long Press Binder
