@@ -748,11 +748,22 @@
                 const pick = () => {
                     try {
                         const vs = window.speechSynthesis?.getVoices?.() || [];
-                        // 日本語っぽい音声を優先して選ぶ
-                        this.jaVoice =
-                            vs.find((v) => v.lang === "ja-JP") ||
-                            vs.find((v) => (v.lang || "").startsWith("ja")) ||
-                            null;
+                        const ja = vs.filter((v) => (v.lang || "").startsWith("ja"));
+
+                        // できればローカル音声を優先（環境によって効く）
+                        const jaLocal = ja.filter((v) => v.localService);
+                        const pool = jaLocal.length ? jaLocal : ja;
+
+                        const prefer = ["Kyoko", "Otoya", "Siri", "日本語", "JP"];
+                        for (const key of prefer) {
+                            const hit = pool.find((v) => (v.name || "").includes(key));
+                            if (hit) {
+                                this.jaVoice = hit;
+                                return;
+                            }
+                        }
+                        // だめなら先頭
+                        this.jaVoice = pool[0] || null;
                     } catch (e) { }
                 };
 
