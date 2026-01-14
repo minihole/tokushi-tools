@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>めざせ！すうじマスター</title>
+    <style>
+        /* --- CSS VARIABLES & THEME --- */
+        :root {
+            /* Palette */
+            --c-bg-h: 40;
+            --c-bg-s: 50%;
+            --c-bg-l: 95%;
+            --c-bg: hsl(var(--c-bg-h), var(--c-bg-s), var(--c-bg-l));
+            --c-frame: #8b4513;
+            --c-text: #2d3436;
+            --c-primary: #ff6b6b;
+            --c-secondary: #4ecdc4;
+            --c-white: #ffffff;
+
+            /* Typography */
+            --font-family: "Hiragino Maru Gothic ProN", "Rounded Mplus 1c", sans-serif;
+
+            /* Metrics */
+            --item-size: 80px;
+            --radius-md: 16px;
+        }
+
+        /* --- RESET & LAYOUT --- */
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: #222;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            font-family: var(--font-family);
+            touch-action: none;
+        }
+
+        #app {
+            width: 100%;
+            height: 100%;
+            max-width: 100vw;
+            max-height: 56.25vw;
+            background: var(--c-bg);
+            background-image:
+                linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+            position: relative;
+            box-shadow: 0 0 50px black;
+            overflow: hidden;
+            transition: background 0.5s;
+        }
+
+        @media (min-aspect-ratio: 16/9) {
+            #app {
+                max-width: 177.78vh;
+                max-height: 100vh;
+                border: 8px solid var(--c-frame);
+                border-radius: 12px;
+            }
+        }
+
+        /* --- SCREENS --- */
+        .screen {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: var(--c-bg);
+            transition: opacity 0.3s;
+            z-index: 1;
+            padding: 20px;
+        }
+
+        .hidden {
+            opacity: 0;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .active {
+            opacity: 1;
+            pointer-events: auto;
+            z-index: 10;
+        }
+
+        /* Buttons */
+        .btn {
+            background: var(--c-secondary);
+            color: white;
+            border: none;
+            border-bottom: 6px solid rgba(0, 0, 0, 0.2);
+            border-radius: 50px;
+            padding: 1rem 3rem;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .btn:active {
+            transform: translateY(4px);
+            border-bottom-width: 2px;
+        }
+
+        .btn-primary {
+            background: var(--c-primary);
+            font-size: 2.5rem;
+            padding: 1.2rem 4rem;
+        }
+
+        .btn-icon {
+            width: 64px;
+            height: 64px;
+            padding: 0;
+            border-radius: 50%;
+            font-size: 1.8rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Title */
+        .hero-title {
+            font-size: 4.5rem;
+            color: var(--c-primary);
+            text-shadow: 4px 4px 0 white, 6px 6px 0 rgba(0, 0, 0, 0.1);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        /* Badge Case (Scrollable) */
+        .badge-case {
+            width: 90%;
+            height: 50%;
+            max-height: 300px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: var(--radius-md);
+            padding: 15px;
+            margin-top: 20px;
+            border: 2px dashed rgba(0, 0, 0, 0.2);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .badge-case h3 {
+            margin: 0 0 10px 0;
+            color: #666;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+
+        /* Grid Layout */
+        .badge-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+            gap: 15px;
+            padding: 5px;
+        }
+
+        .badge-cell {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .badge-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 3px solid #ccc;
+            background: white;
+            font-size: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 0 rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+
+        .badge-name {
+            margin-top: 5px;
+            font-size: 0.8rem;
+            color: #555;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        /* States */
+        .badge-cell.locked .badge-icon {
+            filter: brightness(0.2) grayscale(1);
+            opacity: 0.6;
+            border-style: dashed;
+        }
+
+        .badge-cell.unlocked .badge-icon {
+            border-color: gold;
+            background: #fff9db;
+            animation: bounceIn 0.5s;
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0)
+            }
+
+            80% {
+                transform: scale(1.1)
+            }
+
+            100% {
+                transform: scale(1)
+            }
+        }
+
+        /* HUD */
+        .hud {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 15px;
+            background: rgba(255, 255, 255, 0.9);
+            border-bottom: 3px solid rgba(0, 0, 0, 0.1);
+            z-index: 50;
+        }
+
+        .timer-track {
+            height: 20px;
+            background: #ddd;
+            border-radius: 10px;
+            border: 2px solid #bbb;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .timer-fill {
+            height: 100%;
+            width: 100%;
+            background: #4ecdc4;
+            transition: width 0.1s linear;
+        }
+
+        /* Stage */
+        .stage-area {
+            position: absolute;
+            top: 80px;
+            bottom: 160px;
+            left: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Items & Visibility */
+        /* Items & Visibility */
+        .item {
+            position: absolute;
+            width: var(--item-size);
+            height: var(--item-size);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            /* Base z-index */
+        }
+
+        /* Inner Icon Wrapper for filtering */
+        .item-icon {
+            width: 100%;
+            height: 100%;
+            font-size: calc(var(--item-size) * 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.1s, filter 0.2s;
+        }
+
+        .item:active .item-icon {
+            transform: scale(0.9);
+        }
+
+        .item.counted .item-icon {
+            filter: grayscale(1) opacity(0.2);
+            transform: scale(0.8);
+        }
+
+        .item.highlight .item-icon {
+            filter: drop-shadow(0 0 15px gold) brightness(1.2);
+            transform: scale(1.1);
+        }
+
+        /* Strong Number Badge - Now purely on top */
+        .num-badge {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            /* Centered */
+            background: rgba(255, 255, 255, 0.95);
+            border: 4px solid #333;
+            color: #d63031;
+            /* Strong red/black contrast */
+            font-family: sans-serif;
+            width: 70%;
+            height: 70%;
+            /* Much bigger */
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: calc(var(--item-size) * 0.5);
+            /* Huge number */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            pointer-events: none;
+            z-index: 20;
+            animation: popBadge 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popBadge {
+            from {
+                transform: translate(-50%, -50%) scale(0);
+            }
+
+            to {
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        /* Footer */
+        .footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 160px;
+            background: rgba(255, 255, 255, 0.9);
+            border-top: 3px solid rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+
+        .opt-row {
+            display: flex;
+            gap: 20px;
+        }
+
+        .opt-card {
+            width: 100px;
+            height: 100px;
+            background: white;
+            border: 4px solid var(--c-secondary);
+            border-radius: 20px;
+            font-size: 3.5rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 0 rgba(0, 0, 0, 0.15);
+            cursor: pointer;
+        }
+
+        .opt-card:active {
+            transform: translateY(6px);
+            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.15);
+        }
+
+        /* Feedback */
+        #feedback {
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 200;
+            pointer-events: none;
+        }
+
+        .fb-content {
+            text-align: center;
+        }
+
+        .fb-icon {
+            font-size: 8rem;
+            display: block;
+            animation: pop 0.4s;
+        }
+
+        .fb-text {
+            font-size: 3rem;
+            color: var(--c-primary);
+            font-weight: bold;
+        }
+
+        /* New Badge Popup Overlay */
+        #unlock-notify {
+            position: absolute;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 10px 30px;
+            border-radius: 50px;
+            border: 4px solid gold;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            animation: slideDown 0.5s;
+            z-index: 150;
+        }
+
+        @keyframes slideDown {
+            from {
+                top: -100px
+            }
+
+            to {
+                top: 100px
+            }
+        }
+
+        /* Settings (Scrollable) */
+        #screen-settings {
+            background: white;
+            display: block;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .st-group {
+            border: 1px solid #eee;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .st-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .toggles {
+            display: flex;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .t-btn {
+            padding: 10px 20px;
+            background: #f0f0f0;
+            border-right: 1px solid #ccc;
+            flex: 1;
+            text-align: center;
+        }
+
+        .t-btn.selected {
+            background: var(--c-secondary);
+            color: white;
+            border-color: var(--c-secondary);
+        }
+
+        .rank-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 2px dashed #ddd;
+            font-size: 1.5rem;
+            color: #555;
+        }
+
+        .rank-rank {
+            width: 40px;
+            font-weight: bold;
+            color: var(--c-frame);
+        }
+
+        .rank-score {
+            font-weight: bold;
+            color: var(--c-primary);
+        }
+
+        /* Hold Button Effect */
+        .btn-hold {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-hold::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 0%;
+            background: rgba(0, 0, 0, 0.4);
+            transition: width 0.2s;
+            /* Snap back */
+            pointer-events: none;
+        }
+
+        .btn-hold.is-holding::after {
+            width: 100%;
+            transition: width 3s linear;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="app">
+        <!-- TITLE -->
+        <div id="screen-title" class="screen active">
+            <h1 class="hero-title">めざせ！<br>すうじマスター⭐</h1>
+
+            <button id="btn-start" class="btn btn-primary">ぼうけんへ GO!</button>
+
+            <div class="badge-case">
+                <h3>★ ずかん (<span id="badge-count">0</span> / 25) ★</h3>
+                <div id="badge-list" class="badge-grid"></div>
+            </div>
+
+            <!-- Ranking Button -->
+            <button id="btn-ranking" class="btn-icon"
+                style="position:absolute; top:20px; left:20px; background:gold; border:2px solid #b8860b; font-size:2rem;">👑</button>
+
+            <button id="btn-settings" style="position:absolute; top:20px; right:20px;"
+                class="btn-icon btn-secondary">⚙️</button>
+        </div>
+
+        <!-- SETTINGS -->
+        <div id="screen-settings" class="screen hidden">
+            <h2 style="text-align:center;">設定 (先生用)</h2>
+
+            <div class="st-group">
+                <h3>基本</h3>
+                <div class="st-row">
+                    <span>問題数 (<span id="val-count">10</span>)</span>
+                    <input type="range" id="cfg-count" min="5" max="30" step="5" oninput="settings.updateDisp()">
+                </div>
+                <div class="st-row" style="display:block">
+                    <div style="margin-bottom:5px">難易度</div>
+                    <div class="toggles" id="grp-diff">
+                        <div class="t-btn" onclick="settings.set('diff',1)">1</div>
+                        <div class="t-btn" onclick="settings.set('diff',2)">2</div>
+                        <div class="t-btn" onclick="settings.set('diff',3)">3</div>
+                        <div class="t-btn" onclick="settings.set('diff',4)">4</div>
+                        <div class="t-btn" onclick="settings.set('diff',5)">5</div>
+                    </div>
+                </div>
+                <div class="st-row" style="display:block">
+                    <div style="margin-bottom:5px">テーマ (Lv2以上で種類が増えます)</div>
+                    <div class="toggles" id="grp-theme">
+                        <div class="t-btn" onclick="settings.set('theme','fruit')">🍎</div>
+                        <div class="t-btn" onclick="settings.set('theme','animal')">🦁</div>
+                        <div class="t-btn" onclick="settings.set('theme','vehicle')">🚗</div>
+                        <div class="t-btn" onclick="settings.set('theme','sea')">🐙</div>
+                        <div class="t-btn" onclick="settings.set('theme','cute')">❤️</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="st-group" style="border-color:#ff6b6b; background:#fff5f5;">
+                <h3 style="color:#d63031;">データ管理 (3びょう ながおし)</h3>
+                <div style="display:flex; gap:10px;">
+                    <button id="btn-reset-badges" class="btn"
+                        style="flex:1; background:#ff7675; font-size:1rem; padding:10px;">バッジリセット</button>
+                    <button id="btn-reset-rank" class="btn"
+                        style="flex:1; background:#ff7675; font-size:1rem; padding:10px;">ランキングリセット</button>
+                </div>
+            </div>
+
+            <button id="btn-settings-back" class="btn btn-secondary" style="width:100%; margin-bottom:50px;">ほぞんして
+                もどる</button>
+        </div>
+
+        <!-- RANKING MODAL -->
+        <div id="modal-ranking" class="screen hidden" style="background:rgba(0,0,0,0.8); z-index:2000;">
+            <div
+                style="background:white; width:90%; max-width:500px; height:80%; border-radius:20px; padding:20px; display:flex; flex-direction:column; border:6px solid gold;">
+                <h2 style="text-align:center; margin:0 0 15px 0; color:#b8860b;">🏆 ランキング 🏆</h2>
+
+                <!-- Tabs -->
+                <div style="display:flex; gap:5px; margin-bottom:15px;">
+                    <div class="t-btn" onclick="ranking.tab(1)" id="rt-1">Lv1</div>
+                    <div class="t-btn" onclick="ranking.tab(2)" id="rt-2">Lv2</div>
+                    <div class="t-btn" onclick="ranking.tab(3)" id="rt-3">Lv3</div>
+                    <div class="t-btn" onclick="ranking.tab(4)" id="rt-4">Lv4</div>
+                    <div class="t-btn" onclick="ranking.tab(5)" id="rt-5">Lv5</div>
+                </div>
+
+                <!-- List -->
+                <div id="rank-list"
+                    style="flex:1; background:#f9f9f9; border-radius:10px; padding:15px; overflow-y:auto;">
+                    <!-- Injected via JS -->
+                </div>
+
+                <button id="btn-rank-close" class="btn btn-secondary" style="margin-top:15px;">とじる</button>
+            </div>
+        </div>
+
+        <!-- GAME -->
+        <div id="screen-game" class="screen hidden">
+            <div class="hud">
+                <!-- Left: Pause/Home -->
+                <button id="btn-home-ingame" class="btn-icon"
+                    style="background:white; border:3px solid #999; z-index:100;">⏸</button>
+
+                <!-- Center: Progress & Timer -->
+                <div style="flex:1; display:flex; flex-direction:column; margin:0 15px;">
+                    <div
+                        style="display:flex; justify-content:space-between; font-size:1.2rem; font-weight:bold; color:#555; margin-bottom:2px;">
+                        <span>もんだい <span id="hud-progress">1 / 10</span></span>
+                        <span>★ <span id="game-score">0</span></span>
+                    </div>
+                    <div class="timer-track">
+                        <div id="timer-bar" class="timer-fill"></div>
+                    </div>
+                </div>
+
+                <!-- Right: Settings -->
+                <button id="btn-settings-ingame" class="btn-icon"
+                    style="background:white; border:3px solid #999; z-index:100;">⚙️</button>
+            </div>
+
+            <div id="stage" class="stage-area"></div>
+
+            <div class="footer">
+                <div id="q-text" style="font-size:1.8rem; margin-bottom:10px; font-weight:bold;">いくつ かな？</div>
+                <div id="opt-row" class="opt-row"></div>
+            </div>
+        </div>
+
+        <!-- PAUSE MODAL -->
+        <div id="modal-pause" class="screen hidden" style="background:rgba(0,0,0,0.7); z-index:1000;">
+            <div
+                style="background:white; padding:30px; border-radius:20px; text-align:center; box-shadow:0 10px 30px rgba(0,0,0,0.5); border:6px solid var(--c-frame);">
+                <h2 style="font-size:2.5rem; margin:0 0 30px 0; color:var(--c-frame);">きゅうけい中</h2>
+                <div style="display:flex; gap:20px; justify-content:center;">
+                    <button id="btn-resume" class="btn btn-primary">つづける</button>
+                    <button id="btn-quit" class="btn btn-secondary" style="background:#999;">やめる</button>
+                </div>
+                <div style="margin-top:20px;">
+                    <button id="btn-settings-pause" class="btn"
+                        style="background:#ddd; color:#333; font-size:1.2rem; padding:0.8rem 2rem;">設定をみる</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- FEEDBACK -->
+        <div id="feedback" class="screen hidden">
+            <div class="fb-content">
+                <div id="fb-icon" class="fb-icon">⭕</div>
+                <div id="fb-text" class="fb-text">せいかい！</div>
+            </div>
+        </div>
+
+        <!-- NEW BADGE POPUP -->
+        <div id="unlock-notify" class="hidden">
+            <div id="ul-icon" style="font-size:3rem;">🦁</div>
+            <div>
+                <div style="font-size:0.8rem; font-weight:bold; color:gold;">NEW BADGE!</div>
+                <div id="ul-name" style="font-weight:bold;">ライオン</div>
+            </div>
+        </div>
+
+        <!-- RESULT -->
+        <div id="screen-result" class="screen hidden">
+            <h2>ぼうけん しゅうりょう！</h2>
+            <div id="res-badge-area" style="margin:20px; height:80px;"></div>
+            <div style="font-size:2rem;">せいかい: <span id="res-ok">0</span> Point</div>
+            <button id="btn-result-back" class="btn btn-secondary">タイトルへ</button>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * COUNT QUEST v3.0
+         * 25 Items Asset Library, Strict Unlocking, High Visibility
+         */
+
+        /* --- ASSET DATA (25 Items) --- */
+        const ASSETS = {
+            fruit: [
+                { id: 'f1', i: '🍎', n: 'りんご' }, { id: 'f2', i: '🍌', n: 'ばなな' }, { id: 'f3', i: '🍇', n: 'ぶどう' }, { id: 'f4', i: '🍈', n: 'めろん' }, { id: 'f5', i: '🍑', n: 'もも' }
+            ],
+            animal: [
+                { id: 'a1', i: '🦁', n: 'らいおん' }, { id: 'a2', i: '🐘', n: 'ぞう' }, { id: 'a3', i: '🐼', n: 'ぱんだ' }, { id: 'a4', i: '🐰', n: 'うさぎ' }, { id: 'a5', i: '🐱', n: 'ねこ' }
+            ],
+            vehicle: [
+                { id: 'v1', i: '🚗', n: 'くるま' }, { id: 'v2', i: '🚒', n: 'しょうぼうしゃ' }, { id: 'v3', i: '🚑', n: 'きゅうきゅうしゃ' }, { id: 'v4', i: '🚅', n: 'しんかんせん' }, { id: 'v5', i: '🚌', n: 'ばす' }
+            ],
+            sea: [
+                { id: 's1', i: '🐙', n: 'たこ' }, { id: 's2', i: '🐠', n: 'さかな' }, { id: 's3', i: '🐬', n: 'いるか' }, { id: 's4', i: '🐳', n: 'くじら' }, { id: 's5', i: '🐢', n: 'かめ' }
+            ],
+            cute: [
+                { id: 'c1', i: '❤️', n: 'はーと' }, { id: 'c2', i: '⭐️', n: 'ほし' }, { id: 'c3', i: '🎀', n: 'りぼん' }, { id: 'c4', i: '👑', n: 'かんむり' }, { id: 'c5', i: '💎', n: 'ほうせき' }
+            ]
+        };
+
+        /* --- AUDIO --- */
+        const audio = {
+            ctx: null,
+            init() {
+                if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                if (this.ctx.state === 'suspended') this.ctx.resume();
+            },
+            play(type) {
+                try {
+                    if (!this.ctx) return;
+                    const o = this.ctx.createOscillator(); const g = this.ctx.createGain();
+                    const t = this.ctx.currentTime;
+                    if (type === 'tap') {
+                        o.frequency.setValueAtTime(600, t);
+                        o.stop(t + 0.1);
+                    } else if (type === 'ok') {
+                        o.frequency.setValueAtTime(500, t);
+                        o.frequency.setValueAtTime(800, t + 0.1);
+                        o.stop(t + 0.4);
+                    } else if (type === 'ng') {
+                        o.type = 'sawtooth';
+                        o.frequency.setValueAtTime(150, t);
+                        o.stop(t + 0.3);
+                    }
+                    o.connect(g); g.connect(this.ctx.destination); o.start(t);
+                } catch (e) { console.error(e); }
+            },
+            speak(txt, force = false) {
+                try {
+                    if (force) window.speechSynthesis.cancel();
+                    const u = new SpeechSynthesisUtterance(txt); u.lang = 'ja-JP';
+                    window.speechSynthesis.speak(u);
+                } catch (e) { console.error(e); }
+            },
+            stop() { try { window.speechSynthesis.cancel(); } catch (e) { } }
+        };
+        // Removed prototype extension to prevent errors
+
+        /* --- CONFIG & STATE --- */
+        let cfg = { count: 10, diff: 1, theme: 'fruit', choices: 3 };
+        let app = {
+            tm: null, prob: [], idx: 0, correct: 0, locked: false, cur: 0, taps: 0,
+            badges: [], // ['f1', 'a2'] ids
+            ranks: { 1: [], 2: [], 3: [], 4: [], 5: [] }
+        };
+
+        /* --- SETTINGS MANAGER --- */
+        const settings = {
+            load() {
+                const s = localStorage.getItem('cq_v3_cfg');
+                if (s) cfg = { ...cfg, ...JSON.parse(s) };
+                const b = localStorage.getItem('cq_badges');
+                if (b) app.badges = JSON.parse(b);
+                const r = localStorage.getItem('cq_ranks');
+                if (r) app.ranks = JSON.parse(r);
+
+                this.reflect();
+                ui.renderBadges();
+            },
+            save() {
+                cfg.count = parseInt(document.getElementById('cfg-count').value);
+                localStorage.setItem('cq_v3_cfg', JSON.stringify(cfg));
+                this.reflect();
+            },
+            resetBadges() {
+                app.badges = [];
+                localStorage.removeItem('cq_badges');
+                ui.renderBadges();
+                alert('バッジを リセットしました');
+            },
+            resetRanks() {
+                app.ranks = { 1: [], 2: [], 3: [], 4: [], 5: [] };
+                localStorage.removeItem('cq_ranks');
+                alert('ランキングを リセットしました');
+            },
+            set(k, v) { cfg[k] = v; this.reflect(); },
+            updateDisp() { document.getElementById('val-count').innerText = document.getElementById('cfg-count').value; },
+            reflect() {
+                document.getElementById('cfg-count').value = cfg.count;
+                this.updateDisp();
+                // Toggles
+                ['diff', 'theme'].forEach(k => {
+                    const p = document.getElementById('grp-' + k);
+                    if (!p) return;
+                    const w = cfg[k];
+                    Array.from(p.children).forEach(b => {
+                        b.classList.toggle('selected',
+                            (typeof w === 'number' && b.innerText == w) ||
+                            (typeof w !== 'number' && w === b.getAttribute('onclick').match(/'([^']+)'\)/)[1])
+                        );
+                    });
+                });
+                // Theme Colors
+                const map = { fruit: 40, animal: 30, vehicle: 210, sea: 190, cute: 330 };
+                document.documentElement.style.setProperty('--c-bg-h', map[cfg.theme] || 40);
+            }
+        };
+
+        /* --- NAVIGATION --- */
+        const ui = {
+            goto(id) {
+                document.querySelectorAll('.screen').forEach(s => {
+                    s.classList.remove('active'); s.classList.add('hidden');
+                });
+                document.getElementById(id).classList.remove('hidden');
+                document.getElementById(id).classList.add('active');
+            },
+            gotoSettings() { settings.reflect(); this.goto('screen-settings'); },
+            saveBack() { settings.save(); this.goto('screen-title'); ui.renderBadges(); },
+            backTitle() { game.cleanup(); this.goto('screen-title'); ui.renderBadges(); },
+
+            // Render Badge Zukan
+            renderBadges() {
+                const list = document.getElementById('badge-list');
+                list.innerHTML = '';
+                let count = 0;
+
+                // Loop all themes, all items
+                Object.keys(ASSETS).forEach(k => {
+                    ASSETS[k].forEach(item => {
+                        const owned = app.badges.includes(item.id);
+                        if (owned) count++;
+
+                        const cell = document.createElement('div');
+                        cell.className = 'badge-cell ' + (owned ? 'unlocked' : 'locked');
+                        cell.innerHTML = `
+                    <div class="badge-icon">${item.i}</div>
+                    <div class="badge-name">${owned ? item.n : '???'}</div>
+                `;
+                        list.appendChild(cell);
+                    });
+                });
+                document.getElementById('badge-count').innerText = count;
+            }
+        };
+
+        /* --- GAME LOGIC --- */
+        const game = {
+            start() {
+                audio.init(); audio.speak('スタート');
+                app.idx = 0; app.correct = 0;
+                app.startTime = Date.now(); // Start total timer
+
+                // Generate Problems
+                app.prob = [];
+                let max = cfg.diff === 1 ? 3 : cfg.diff === 2 ? 5 : cfg.diff === 3 ? 10 : 20;
+                for (let i = 0; i < cfg.count; i++) app.prob.push(Math.floor(Math.random() * max) + 1);
+
+                ui.goto('screen-game');
+                this.next();
+            },
+
+            next() {
+                this.cleanup();
+                if (app.idx >= cfg.count) { this.finish(); return; }
+
+                app.cur = app.prob[app.idx];
+                app.taps = 0; app.locked = false;
+
+                this.renderStage();
+                this.renderOpts();
+                this.startTimer();
+
+                // Update HUD
+                document.getElementById('hud-progress').innerText = (app.idx + 1) + ' / ' + cfg.count;
+                document.getElementById('game-score').innerText = app.correct;
+
+                audio.speak('いくつかな？');
+                document.getElementById('q-text').innerText = 'いくつ かな？';
+            },
+
+            renderStage() {
+                const st = document.getElementById('stage');
+                st.innerHTML = '';
+                const n = app.cur;
+
+                // Pick Asset
+                const th = ASSETS[cfg.theme];
+                let asset;
+                if (cfg.diff === 1) asset = th[0]; // Fixed first item for Lv1
+                else asset = th[Math.floor(Math.random() * th.length)]; // Random for Lv2+
+
+                // Dynamic Size
+                let sz = 80;
+                if (n <= 3) sz = 130;  // Huge for Lv1
+                else if (n <= 5) sz = 110;
+                else if (n <= 10) sz = 90;
+                else sz = 70;
+                document.documentElement.style.setProperty('--item-size', sz + 'px');
+
+                // Positioning (Random w/ collision)
+                const items = [];
+                const w = st.clientWidth; const h = st.clientHeight;
+
+                for (let i = 0; i < n; i++) {
+                    let x, y, ok = false, tc = 0;
+                    while (!ok && tc < 100) {
+                        x = Math.random() * (w - sz); y = Math.random() * (h - sz);
+                        ok = true;
+                        for (let prev of items) {
+                            if (Math.hypot(x - prev.x, y - prev.y) < sz + 5) ok = false;
+                        }
+                        if (i < 5 && cfg.layout === 'block5') ok = true; // Bypass for grid if implemented
+                        tc++;
+                    }
+                    items.push({ x, y });
+
+                    const el = document.createElement('div');
+                    el.className = 'item';
+
+                    const elIcon = document.createElement('div');
+                    elIcon.className = 'item-icon';
+                    elIcon.innerText = asset.i;
+                    el.appendChild(elIcon);
+
+                    el.style.left = x + 'px'; el.style.top = y + 'px';
+
+                    // iPad Touch
+                    const hnd = (e) => { e.preventDefault(); e.stopPropagation(); this.tap(el); };
+                    el.addEventListener('touchstart', hnd, { passive: false });
+                    el.addEventListener('mousedown', hnd);
+
+                    st.appendChild(el);
+                }
+            },
+
+            tap(el) {
+                if (app.locked) return;
+                if (!el.classList.contains('counted')) {
+                    audio.play('tap'); app.taps++;
+                    el.classList.add('counted');
+
+                    // Number Badge
+                    const b = document.createElement('div');
+                    b.className = 'num-badge';
+                    b.innerText = app.taps;
+                    el.appendChild(b);
+
+                    // Speak
+                    audio.speak(app.taps.toString(), true);
+                }
+            },
+
+            renderOpts() {
+                const r = document.getElementById('opt-row'); r.innerHTML = '';
+                const ans = app.cur;
+                const set = new Set([ans]);
+                while (set.size < 3) {
+                    let d = ans + (Math.random() > 0.5 ? 1 : -1) * Math.ceil(Math.random() * 3);
+                    if (d > 0 && d !== ans) set.add(d);
+                    else set.add(Math.floor(Math.random() * 10) + 1);
+                }
+                Array.from(set).sort((a, b) => a - b).forEach(v => {
+                    const b = document.createElement('div');
+                    b.className = 'opt-card'; b.innerText = v;
+                    const h = (e) => { e.preventDefault(); e.stopPropagation(); this.check(v); };
+                    b.addEventListener('touchstart', h, { passive: false });
+                    b.addEventListener('mousedown', h);
+                    r.appendChild(b);
+                });
+            },
+
+            check(v) {
+                if (app.locked) return;
+                clearInterval(app.tm);
+
+                if (v === app.cur) {
+                    app.locked = true;
+                    app.correct++;
+                    audio.play('ok'); audio.speak('せいかい！');
+                    this.feedback(true);
+                    setTimeout(() => { app.idx++; this.next(); }, 1500);
+                } else {
+                    audio.play('ng'); audio.speak('ちがうよ');
+                    this.feedback(false);
+                    // Hint logic omitted for brevity, just retry
+                    setTimeout(() => {
+                        this.resetAll();
+                        this.startTimer();
+                    }, 1000);
+                }
+            },
+
+            feedback(ok) {
+                const f = document.getElementById('feedback');
+                document.getElementById('fb-icon').innerText = ok ? '⭕' : '❌';
+                document.getElementById('fb-text').innerText = ok ? 'せいかい！' : 'ちがうよ';
+                f.classList.remove('hidden'); f.classList.add('active');
+                setTimeout(() => { f.classList.remove('active'); f.classList.add('hidden'); }, 1000);
+            },
+
+            resetAll() {
+                app.locked = false; app.taps = 0;
+                document.querySelectorAll('.item').forEach(e => {
+                    e.classList.remove('counted');
+                    // Remove checks/badges only
+                    const b = e.querySelector('.num-badge');
+                    if (b) b.remove();
+                });
+            },
+
+            startTimer() {
+                const bar = document.getElementById('timer-bar');
+                bar.style.transition = 'none'; bar.style.width = '100%';
+                let rem = 20; // fixed for now
+                app.tm = setInterval(() => {
+                    rem -= 0.1;
+                    bar.style.width = (rem / 20 * 100) + '%';
+                    if (rem <= 0) clearInterval(app.tm);
+                }, 100);
+            },
+
+            finish() {
+                const totalTime = ((Date.now() - app.startTime) / 1000).toFixed(1);
+
+                // Unlock Logic
+                const win = app.correct >= cfg.count * 0.8;
+                const reward = document.getElementById('res-badge-area');
+                reward.innerHTML = '';
+
+                if (win) {
+                    // Find an item to unlock
+                    const th = ASSETS[cfg.theme];
+                    // Try to find one we don't have
+                    const cand = th.filter(i => !app.badges.includes(i.id));
+                    let got = null;
+                    if (cand.length > 0) {
+                        // Unlock new!
+                        got = cand[Math.floor(Math.random() * cand.length)];
+                    } else {
+                        // Already have all, pick random just for display
+                        got = th[Math.floor(Math.random() * th.length)];
+                    }
+
+                    if (!app.badges.includes(got.id)) {
+                        app.badges.push(got.id);
+                        localStorage.setItem('cq_badges', JSON.stringify(app.badges));
+
+                        // Show floating notify
+                        const notif = document.getElementById('unlock-notify');
+                        document.getElementById('ul-icon').innerText = got.i;
+                        document.getElementById('ul-name').innerText = got.n;
+                        notif.classList.remove('hidden');
+                        setTimeout(() => notif.classList.add('hidden'), 3000);
+                    }
+                    // Result Display
+                    reward.innerHTML = `<div style="font-size:4rem;">${got.i}</div><div>${got.n}</div>`;
+                }
+
+                // Save Ranking
+                game.checkRank(totalTime);
+
+                document.getElementById('res-ok').innerText = app.correct;
+                ui.goto('screen-result');
+                audio.speak('おつかれさま');
+            },
+
+            cleanup() {
+                clearInterval(app.tm); audio.stop(); app.locked = true;
+            },
+
+            // --- PAUSE SYSTEM ---
+            pause() {
+                clearInterval(app.tm);
+                app.locked = true;
+                this.showPauseModal(true);
+            },
+
+            resume() {
+                this.showPauseModal(false);
+                app.locked = false;
+                // Resume timer
+                const bar = document.getElementById('timer-bar');
+                // Note: Simple resume. For precision we would calc remaining time explicitly.
+                // Re-start logic for simplicity:
+                app.tm = setInterval(() => {
+                    const curW = parseFloat(bar.style.width || 100);
+                    if (curW <= 0) { clearInterval(app.tm); return; }
+                    bar.style.width = (curW - 0.5) + '%'; // Approx decrement
+                }, 100);
+            },
+
+            quit() {
+                this.showPauseModal(false);
+                this.cleanup();
+                ui.goto('screen-title');
+                ui.renderBadges();
+            },
+
+            showPauseModal(show) {
+                const m = document.getElementById('modal-pause');
+                if (show) { m.classList.remove('hidden'); m.classList.add('active'); }
+                else { m.classList.remove('active'); m.classList.add('hidden'); }
+            },
+
+            goToSettings() {
+                this.pause();
+                settings.reflect();
+                // Special case: we want to go back to PAUSE when done
+                ui.goto('screen-settings');
+                // We need to flag that we came from game
+                app.fromGame = true;
+            },
+
+            calcScore() {
+                // Base: 10 pts per correct
+                // Bonus: Time remaining (on timer bar) is tricky to get exactly from width.
+                // Let's rely on correct count mostly as user requested "Level" ranking.
+                // Or just Correct Count. 
+                // Req: "Level-wise Top 3".
+                return app.correct;
+            },
+
+            checkRank(totalTime) {
+                const sc = app.correct;
+                const rate = Math.round((sc / cfg.count) * 100);
+                const lv = cfg.diff;
+                let list = app.ranks[lv] || [];
+
+                // Add new score
+                const date = new Date();
+                const dStr = (date.getMonth() + 1) + '/' + date.getDate();
+                list.push({ rate: rate, time: parseFloat(totalTime), d: dStr });
+
+                // Sort Logic: Rate DESC > Time ASC
+                list.sort((a, b) => {
+                    if (b.rate !== a.rate) return b.rate - a.rate;
+                    return a.time - b.time;
+                });
+
+                // Keep Top 3
+                list = list.slice(0, 3);
+
+                app.ranks[lv] = list;
+                localStorage.setItem('cq_ranks', JSON.stringify(app.ranks));
+                return list;
+            }
+        };
+
+        const ranking = {
+            curLv: 1,
+            open() {
+                this.tab(cfg.diff); // Default to current diff
+                document.getElementById('modal-ranking').classList.remove('hidden');
+                document.getElementById('modal-ranking').classList.add('active');
+            },
+            close() {
+                document.getElementById('modal-ranking').classList.remove('active');
+                document.getElementById('modal-ranking').classList.add('hidden');
+            },
+            tab(lv) {
+                this.curLv = lv;
+                // Highlight tab
+                for (let i = 1; i <= 5; i++) {
+                    const t = document.getElementById('rt-' + i);
+                    if (i === lv) t.classList.add('selected');
+                    else t.classList.remove('selected');
+                }
+                this.render();
+            },
+            render() {
+                const list = app.ranks[this.curLv] || [];
+                const c = document.getElementById('rank-list');
+                c.innerHTML = '';
+
+                if (list.length === 0) {
+                    c.innerHTML = '<div style="text-align:center; margin-top:50px; color:#aaa;">まだ ありません</div>';
+                    return;
+                }
+
+                list.forEach((r, i) => {
+                    const row = document.createElement('div');
+                    row.className = 'rank-row';
+                    // Icons logic
+                    let icon = (i === 0) ? '🥇' : (i === 1) ? '🥈' : '🥉';
+                    row.innerHTML = `
+                        <div class="rank-rank">${icon}</div>
+                        <div style="font-size:0.9rem; color:#999;">${r.d}</div>
+                        <div class="rank-score">
+                            <span style="display:block; font-size:1.2rem; text-align:right;">${r.rate}%</span>
+                            <span style="display:block; font-size:0.8rem; color:#888;">${r.time}s</span>
+                        </div>
+                    `;
+                    c.appendChild(row);
+                });
+            }
+        };
+
+        /* --- DOM INIT & HELPERS --- */
+        const uiHelper = {
+            bind(id, fn) {
+                const el = document.getElementById(id);
+                if (!el) return;
+                const h = (e) => {
+                    e.preventDefault(); e.stopPropagation();
+                    fn(e);
+                };
+                el.addEventListener('touchstart', h, { passive: false });
+                el.addEventListener('click', h);
+            },
+
+            // Long Press Binder
+            bindHold(id, fn, duration = 3000) {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.classList.add('btn-hold');
+
+                let tm = null;
+
+                const start = (e) => {
+                    if (e.type === 'touchstart') e.preventDefault();
+                    if (tm) clearTimeout(tm);
+                    el.classList.add('is-holding');
+
+                    tm = setTimeout(() => {
+                        fn();
+                        end(); // Force end visual
+                    }, duration);
+                };
+
+                const end = (e) => {
+                    if (tm) clearTimeout(tm);
+                    tm = null;
+                    el.classList.remove('is-holding');
+                };
+
+                el.addEventListener('mousedown', start);
+                el.addEventListener('touchstart', start, { passive: false });
+
+                el.addEventListener('mouseup', end);
+                el.addEventListener('mouseleave', end);
+                el.addEventListener('touchend', end);
+                el.addEventListener('touchcancel', end);
+            }
+        };
+
+        window.onload = () => {
+            // Attach Events Robustly
+            uiHelper.bind('btn-start', () => game.start());
+            uiHelper.bind('btn-settings', () => { app.fromGame = false; ui.gotoSettings(); });
+            uiHelper.bind('btn-settings-back', () => {
+                settings.save();
+                if (app.fromGame) {
+                    game.showPauseModal(true); // Back to pause
+                    ui.goto('screen-game'); // Show game screen under strict locked
+                } else {
+                    ui.goto('screen-title');
+                    ui.renderBadges();
+                }
+            });
+
+            // HUD Buttons
+            uiHelper.bind('btn-home-ingame', () => game.pause());
+            uiHelper.bind('btn-settings-ingame', () => game.goToSettings());
+
+            // Pause Modal
+            uiHelper.bind('btn-resume', () => game.resume());
+            uiHelper.bind('btn-quit', () => game.quit());
+            uiHelper.bind('btn-settings-pause', () => game.goToSettings());
+
+            uiHelper.bind('btn-result-back', () => ui.backTitle());
+
+            // Rankings & Reset
+            uiHelper.bind('btn-ranking', () => ranking.open());
+            uiHelper.bind('btn-rank-close', () => ranking.close());
+
+            // Hold 3s to Reset
+            uiHelper.bindHold('btn-reset-badges', () => settings.resetBadges(), 3000);
+            uiHelper.bindHold('btn-reset-rank', () => settings.resetRanks(), 3000);
+
+            settings.load();
+        };
+
+    </script>
+</body>
+
+</html>
