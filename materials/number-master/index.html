@@ -730,38 +730,104 @@
         /* --- AUDIO --- */
         const audio = {
             ctx: null,
+            unlocked: false,
+            _voicesInit: false,
+            jaVoice: null,
+
             init() {
-                if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-                if (this.ctx.state === 'suspended') this.ctx.resume();
+                try {
+                    if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    if (this.ctx.state === "suspended") this.ctx.resume().catch(() => { });
+                } catch (e) { }
             },
+
+            prepareVoices() {
+                if (this._voicesInit) return;
+                this._voicesInit = true;
+
+                const pick = () => {
+                    try {
+                        const vs = window.speechSynthesis?.getVoices?.() || [];
+                        // 日本語っぽい音声を優先して選ぶ
+                        this.jaVoice =
+                            vs.find((v) => v.lang === "ja-JP") ||
+                            vs.find((v) => (v.lang || "").startsWith("ja")) ||
+                            null;
+                    } catch (e) { }
+                };
+
+                pick();
+                try {
+                    window.speechSynthesis?.addEventListener?.("voiceschanged", pick);
+                } catch (e) { }
+            },
+
+            unlock() {
+                // iPad/iPhone向け：ここで確実に解放する
+                this.init();
+                this.prepareVoices();
+                this.unlocked = true;
+
+                // 解放確認（小さく）
+                this.play("tap");
+                this.speak("おと  OK", true);
+            },
+
             play(type) {
                 try {
+                    this.init();
                     if (!this.ctx) return;
-                    const o = this.ctx.createOscillator(); const g = this.ctx.createGain();
+
+                    const o = this.ctx.createOscillator();
+                    const g = this.ctx.createGain();
                     const t = this.ctx.currentTime;
-                    if (type === 'tap') {
-                        o.frequency.setValueAtTime(600, t);
-                        o.stop(t + 0.1);
-                    } else if (type === 'ok') {
-                        o.frequency.setValueAtTime(500, t);
-                        o.frequency.setValueAtTime(800, t + 0.1);
-                        o.stop(t + 0.4);
-                    } else if (type === 'ng') {
-                        o.type = 'sawtooth';
-                        o.frequency.setValueAtTime(150, t);
-                        o.stop(t + 0.3);
+
+                    // ちょい小さめ（耳にやさしく）
+                    g.gain.setValueAtTime(0.08, t);
+
+                    if (type === "tap") {
+                        o.type = "sine";
+                        o.frequency.setValueAtTime(650, t);
+                        o.stop(t + 0.08);
+                    } else if (type === "ok") {
+                        o.type = "sine";
+                        o.frequency.setValueAtTime(520, t);
+                        o.frequency.setValueAtTime(880, t + 0.08);
+                        o.stop(t + 0.28);
+                    } else if (type === "ng") {
+                        o.type = "sawtooth";
+                        o.frequency.setValueAtTime(160, t);
+                        o.stop(t + 0.2);
+                    } else {
+                        o.stop(t + 0.08);
                     }
-                    o.connect(g); g.connect(this.ctx.destination); o.start(t);
-                } catch (e) { console.error(e); }
+
+                    o.connect(g);
+                    g.connect(this.ctx.destination);
+                    o.start(t);
+                } catch (e) { }
             },
+
             speak(txt, force = false) {
                 try {
+                    this.prepareVoices();
                     if (force) window.speechSynthesis.cancel();
-                    const u = new SpeechSynthesisUtterance(txt); u.lang = 'ja-JP';
+
+                    const u = new SpeechSynthesisUtterance(String(txt));
+                    u.lang = "ja-JP";
+                    if (this.jaVoice) u.voice = this.jaVoice;
+                    u.rate = 0.95;
+                    u.pitch = 1.05;
+
                     window.speechSynthesis.speak(u);
-                } catch (e) { console.error(e); }
+                } catch (e) { }
             },
-            stop() { try { window.speechSynthesis.cancel(); } catch (e) { } }
+
+            stop() {
+                try {
+                    window.speechSynthesis.cancel();
+                } catch (e) { }
+            }
         };
         // Removed prototype extension to prevent errors
 
@@ -1263,7 +1329,89 @@
             }
         };
 
+        // iPadOSがMac扱いになる問題も拾う
+        const isIOS =
+            /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+            (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
+        function setupAudioGate() {
+            if (!isIOS) return;
+
+            const appEl = document.getElementById("app");
+            if (!appEl) return;
+
+            const gate = document.createElement("div");
+            gate.style.position = "absolute";
+            gate.style.inset = "0";
+            gate.style.zIndex = "5000";
+            gate.style.display = "flex";
+            gate.style.alignItems = "center";
+            gate.style.justifyContent = "center";
+            gate.style.background = "rgba(0,0,0,0.35)";
+            gate.style.backdropFilter = "blur(2px)";
+
+            const card = document.createElement("div");
+            card.style.background = "white";
+            card.style.borderRadius = "20px";
+            card.style.padding = "22px";
+            card.style.width = "min(520px, 90%)";
+            card.style.boxShadow = "0 12px 40px rgba(0,0,0,0.35)";
+            card.style.textAlign = "center";
+            card.style.border = "6px solid #8b4513";
+
+            const title = document.createElement("div");
+            title.textContent = "🔈 おとを つかう";
+            title.style.fontSize = "28px";
+            title.style.fontWeight = "900";
+            title.style.marginBottom = "10px";
+
+            const sub = document.createElement("div");
+            sub.textContent = "はじめに 1かい おしてね";
+            sub.style.fontSize = "18px";
+            sub.style.fontWeight = "700";
+            sub.style.color = "#444";
+            sub.style.marginBottom = "14px";
+
+            const btn = document.createElement("button");
+            btn.textContent = "OK";
+            btn.style.fontSize = "32px";
+            btn.style.fontWeight = "900";
+            btn.style.border = "none";
+            btn.style.borderRadius = "999px";
+            btn.style.padding = "14px 44px";
+            btn.style.background = "#4ecdc4";
+            btn.style.color = "white";
+            btn.style.boxShadow = "0 8px 0 rgba(0,0,0,0.18)";
+
+            const unlockNow = (e) => {
+                try { e?.preventDefault?.(); e?.stopPropagation?.(); } catch (_) { }
+                audio.unlock();
+
+                // 0.4秒くらい残してから消す（読み上げが途切れにくい）
+                setTimeout(() => {
+                    try { gate.remove(); } catch (_) { }
+                }, 450);
+            };
+
+            btn.addEventListener("touchstart", unlockNow, { passive: false });
+            btn.addEventListener("click", unlockNow);
+
+            card.appendChild(title);
+            card.appendChild(sub);
+            card.appendChild(btn);
+            gate.appendChild(card);
+            appEl.appendChild(gate);
+
+            // 画面復帰で音が死んだ時の保険
+            document.addEventListener("visibilitychange", () => {
+                if (document.visibilityState === "visible") {
+                    audio.init();
+                }
+            });
+        }
+
         window.onload = () => {
+            setupAudioGate();
             // Attach Events Robustly
             uiHelper.bind('btn-start', () => game.start());
             uiHelper.bind('btn-settings', () => { app.fromGame = false; ui.gotoSettings(); });
