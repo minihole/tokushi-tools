@@ -1073,7 +1073,8 @@
                 if (v === app.cur) {
                     app.locked = true;
                     app.correct++;
-                    audio.play('ok'); audio.speak('せいかい！');
+                    audio.play('ok');
+                    audio.speak("せいかい！", { rate: 0.98, pitch: 1.0 }); // ←短文は少し速めが自然
                     this.feedback(true);
                     setTimeout(() => { app.idx++; this.next(); }, 1500);
                 } else {
@@ -1342,6 +1343,14 @@
                 el.addEventListener('touchcancel', end);
             }
         };
+
+        // Initial VH
+        function setVH() {
+            document.documentElement.style.setProperty("--vh", `${window.innerHeight * 0.01}px`);
+        }
+        window.addEventListener("resize", setVH);
+        window.addEventListener("orientationchange", setVH);
+        setVH();
 
         // iPadOSがMac扱いになる問題も拾う
         const isIOS =
